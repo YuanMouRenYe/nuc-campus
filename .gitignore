@@ -1,0 +1,24 @@
+# dependencies / caches
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.log
+
+# release archives
+*.zip
+partsgh/
+parts/
+
+# local-only reference material (never commit: not redistributable)
+data/sat*.jpg
+data/sat/
+data/sat18/
+data/sat_overlay.jpg
+data/crops/*.jpg
+data/map_preview*.png
+ref/
+orig/
+shots/
+assets_src/

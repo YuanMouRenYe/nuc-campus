@@ -1,0 +1,70 @@
+# 中北大学 · 像素校园漫步 (nuc-campus) v7.6.4
+
+一个俯视角(3/4 视角)像素风的中北大学(太原)校园漫步游戏。纯静态 HTML5 Canvas,无构建步骤、无运行时依赖。
+
+![悬停介绍](docs/screenshots/v764_tooltip.png)
+
+## 功能概览
+- **真实布局**:校园道路、建筑轮廓、水系、绿地取自 OpenStreetMap,比例 2.5 m / 格(1 格 = 16 px),地图 755×514 格。覆盖西区、中心区、东区、北区、南区 · 德怀广场、二龙山、汾河沿岸。
+- **真实地形**:SRTM 等高程数据(Terrarium 瓦片)生成台地分层、挡土墙、坡道和台阶。
+- **可进入的室内**:主楼(含 2F 校史展廊)、图书馆(含 2F)、鸿学楼 301/302 教室、文瀛苑9号公寓 413 宿舍、体育馆、文瀛食堂 / 食味坊 / 田园餐厅 / 龙山餐厅等(多层,楼梯相连)。
+- **作息与 NPC**:按中北大学冬令时 / 夏令时作息打铃;学生按时段在教学楼、食堂、宿舍、图书馆之间流动;23:00 熄灯;06:00–07:00 教官大队在行知广场训练,07:00 升旗护卫队出旗,07:05 旗帜升到顶。
+- **季节与天气**:按真实日期自动换季(春夏秋冬树木、积雪),晴 / 雨 / 雪。
+- **任务与小测**:每日任务、鸿学楼 302 高数小测。
+- **悬停介绍**:鼠标移到建筑或地标上显示 1–3 句介绍,共 137 处,其中 71 处有出处,其余标注「未核实」。
+- **音效**:脚步、上下课铃、鸟鸣 / 虫鸣 / 雨声(均为 CC0)。存档保存在浏览器 localStorage。
+
+## 本地运行
+游戏需要通过 HTTP 打开(`file://` 下 `fetch` 不可用):
+```bash
+cd game && python3 -m http.server 8090
+```
+浏览器打开 http://localhost:8090/ 。没有 Python 也可用 `npx serve -l 8090 .`(在 game/ 目录下)。
+
+## 操作
+| 按键 | 作用 |
+|---|---|
+| WASD / 方向键 | 行走 |
+| Shift | 跑 |
+| E / 空格 / 回车 | 进门、和学生交谈、查看牌子或雕像 |
+| M | 全图(点击传送) |
+| + / − / 鼠标滚轮 | 缩放(0.25×、0.5×、1–4×) |
+| Q | 显示 / 隐藏任务面板 |
+| V | 静音 / 取消静音 |
+| N | 时间快进 1 小时 |
+| J | 切换季节:自动 → 春 → 夏 → 秋 → 冬 |
+| T | 切换天气:自动 → 晴 → 雨 → 雪 |
+| 1–4 | 回答 302 高数小测 |
+| Esc | 关闭地图或对话框 |
+
+触屏:拖动行走,双指捏合缩放,右下角圆形 **E** 按钮交互。走到门口的门垫格子即可离开室内。
+
+调试用 URL 参数(节选):`x`、`y`(起点格坐标)、`zoom`、`t`(分钟,如 `t=1290` 即 21:30)、`interior=main|library|canteen|classroom|dorm|gym…`、`season=`、`weather=`、`bells=summer|winter`、`nosave`、`reset`、`mute`。带 `x`/`y`/`t`/`interior`/`nosave` 时不读写存档。完整列表见 [docs/CHANGELOG_full_en.md](docs/CHANGELOG_full_en.md) 的 “Controls” 一节。
+
+## 测试
+需要 Node.js ≥ 22(使用内置 `node:test`,无第三方依赖):
+```bash
+npm test            # 仓库根目录;等价于 cd game && npm test
+```
+当前结果:137 个测试,133 通过,0 失败,4 跳过(v7.3 南侧大台阶已在 v7.6.4 中移除,对应用例跳过)。
+
+## 目录结构
+```
+game/            可直接部署的静态游戏(index.html、js/、data/、assets/、audio/、tests/)
+tools/           地图生成管线(build_map.py + layout_v*.py 等)、角色精灵生成、e2e 脚本
+data/            构建输入:OSM 原始数据、DEM 高程瓦片、手绘补充数据(不含卫星图)
+docs/            说明文档、命名依据、作息依据、完整英文更新日志、截图
+.github/workflows/pages.yml   可选:GitHub Pages 自动部署 game/
+```
+
+## 文档
+- [docs/HOW_IT_WAS_MADE.md](docs/HOW_IT_WAS_MADE.md):制作方法、数据来源、管线、版本历史、未核实清单
+- [docs/UPLOAD_TO_GITHUB.md](docs/UPLOAD_TO_GITHUB.md)(副本:`上传到GitHub说明.md`):上传到 GitHub 的步骤
+- [ATTRIBUTION.md](ATTRIBUTION.md)、[CREDITS.md](CREDITS.md):数据与素材署名、许可
+- [docs/NAMES.md](docs/NAMES.md)、[docs/V7_SOURCES.md](docs/V7_SOURCES.md)、[docs/bell_times.md](docs/bell_times.md)、[game/data/canteens_sources.md](game/data/canteens_sources.md):命名、作息、食堂的出处
+
+## 许可
+- 代码:MIT,见 [LICENSE](LICENSE)。
+- 地图数据:© OpenStreetMap contributors,ODbL 1.0;高程数据署名见 [ATTRIBUTION.md](ATTRIBUTION.md)。
+- 字体 OFL 1.1;角色精灵与音效 CC0。
+- 「中北大学」校名及相关标识归中北大学所有;本项目为非官方作品,与中北大学无隶属关系。
