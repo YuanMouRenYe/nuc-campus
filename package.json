@@ -1,6 +1,6 @@
 {
   "name": "nuc-campus",
-  "version": "7.6.4",
+  "version": "7.8",
   "private": true,
   "description": "中北大学像素校园漫步 — 静态 HTML5 Canvas 游戏",
   "license": "MIT",

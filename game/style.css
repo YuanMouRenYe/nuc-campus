@@ -55,3 +55,62 @@ canvas { image-rendering: pixelated; image-rendering: crisp-edges; display: bloc
 #tip b { color: #6a1f12; font-size: 13px; }
 #tip .ts { color: #8a6a4a; font-size: 10px; margin-top: 2px; }
 @media (hover: none) { #tip { display: none; } }
+
+/* v7.7 成就提示（星露谷式木框 toast）、成就面板、菜单、手机摇杆和按钮 */
+#achtoast { left: 50%; top: 62px; display: flex; gap: 10px; align-items: center; padding: 8px 14px 8px 8px; min-width: 240px; z-index: 40; transform: translate(-50%, -260%); transition: transform .35s steps(5); pointer-events: none; }
+#achtoast.on { transform: translate(-50%, 0); }
+#achtoast .ai { width: 44px; height: 44px; font-size: 28px; line-height: 44px; text-align: center; background: #e9c47a; border: 3px solid #6b3a1e; box-shadow: inset 0 0 0 2px #f8e2a8; }
+#achtoast .ah { font-size: 12px; color: #9a5a20; } #achtoast .an { font-size: 20px; color: #6a1f12; } #achtoast .ad { font-size: 12px; color: #7a5a3a; }
+#achpanel, #menu { left: 50%; top: 50%; transform: translate(-50%, -50%); display: none; z-index: 45; max-width: 92vw; max-height: 84vh; overflow: auto; font-size: 14px; min-width: 300px; }
+#achpanel.on, #menu.on { display: block; }
+.mt { font-size: 18px; color: #6a1f12; border-bottom: 2px solid #d79b4a; margin-bottom: 6px; padding-bottom: 3px; }
+#achpanel .ar { display: flex; gap: 10px; align-items: center; padding: 4px 0; opacity: .55; } #achpanel .ar.got { opacity: 1; }
+#achpanel .ai2 { width: 32px; height: 32px; font-size: 20px; line-height: 32px; text-align: center; background: #e9c47a; border: 2px solid #6b3a1e; }
+#achpanel .ar i, #menu button i { font-style: normal; font-size: 10px; color: #fff; background: #9a5a20; padding: 0 4px; margin-left: 6px; }
+#achpanel .foot { margin-top: 6px; color: #7a5a3a; }
+#achpanel .close, #menu button { font: inherit; color: #3b1f10; background: #fff3d6; border: 3px solid #c58a45; padding: 6px 10px; margin: 4px 0; cursor: pointer; }
+#menu button { display: block; width: 100%; text-align: left; } #menu button span { display: inline-block; width: 1.6em; }
+#menubtn { right: 16px; bottom: 62px; width: 44px; height: 40px; padding: 0; font-size: 20px; cursor: pointer; }
+#ridebtn, #joy { display: none; }
+#tip.tap { pointer-events: none; }
+@media (hover: none) { #tip.tap { display: block; } }
+body.touch, body.touch * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+html, body { touch-action: none; overscroll-behavior: none; }
+body.touch #help { display: none; }
+body.touch #ebtn { display: flex; right: calc(18px + env(safe-area-inset-right)); bottom: calc(110px + env(safe-area-inset-bottom)); width: 76px; height: 76px; }
+body.touch #ridebtn { display: flex; flex-direction: column; align-items: center; justify-content: center; right: calc(106px + env(safe-area-inset-right)); bottom: calc(40px + env(safe-area-inset-bottom)); width: 64px; height: 64px; border-radius: 50%; padding: 0; opacity: .7; touch-action: none; }
+#ridebtn b { font-size: 24px; line-height: 26px; font-weight: normal; } #ridebtn span { font-size: 12px; } #ridebtn.on { opacity: 1; background: #ffe9a8; }
+body.touch #menubtn { right: calc(18px + env(safe-area-inset-right)); bottom: calc(24px + env(safe-area-inset-bottom)); width: 56px; height: 52px; font-size: 24px; }
+body.touch #mute { right: calc(30px + env(safe-area-inset-right)); bottom: calc(200px + env(safe-area-inset-bottom)); width: 48px; height: 40px; }
+body.touch #joy { display: block; position: fixed; left: calc(22px + env(safe-area-inset-left)); bottom: calc(26px + env(safe-area-inset-bottom)); width: 136px; height: 136px; border-radius: 50%; background: rgba(247,227,176,.35); border: 4px solid rgba(107,58,30,.75); box-shadow: inset 0 0 0 3px rgba(215,155,74,.5); touch-action: none; z-index: 20; }
+#joyknob { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%; background: #f7e3b0; border: 4px solid #6b3a1e; box-shadow: inset 0 0 0 3px #d79b4a; pointer-events: none; }
+body.touch #hint { bottom: calc(176px + env(safe-area-inset-bottom)); max-width: 92vw; white-space: normal; text-align: center; }
+body.touch #intro { bottom: calc(176px + env(safe-area-inset-bottom)); }
+
+@media (max-width: 700px) { #achtoast { min-width: 0; max-width: 78vw; } #achtoast .an { font-size: 16px; } #toast { white-space: normal; max-width: 86vw; text-align: center; } #mmwrap { padding: 3px; } }
+@media (max-height: 500px) { .panel { font-size: 14px; } #topleft { line-height: 18px; padding: 4px 10px; } #minimap { width: 120px; } #quests { top: 64px; max-width: 200px; max-height: 40vh; overflow: hidden; }
+  body.touch #joy { width: 112px; height: 112px; bottom: 14px; } body.touch #joyknob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
+  body.touch #ebtn { bottom: 76px; width: 64px; height: 64px; } body.touch #ridebtn { bottom: 18px; right: 96px; width: 56px; height: 56px; } body.touch #menubtn { bottom: 14px; }
+  body.touch #mute { bottom: 150px; right: 26px; } body.touch #hint, body.touch #intro { bottom: 18px; max-width: 46vw; } #intro .ib { display: none; } #achtoast { top: 44px; } }
+
+
+/* v7.8 沉浸 / 拍照 / 地标 / 关于 / 紧凑竖屏 */
+body.immersive #topleft, body.immersive #quests, body.immersive #mmwrap, body.immersive #help,
+body.immersive #mute, body.immersive #menubtn, body.immersive #intro, body.immersive #achtoast,
+body.immersive #ridebtn, body.photo #ebtn { opacity: 0; pointer-events: none; }
+body.immersive #immbtn { opacity: .45; pointer-events: auto; }
+body.photo #photobar { display: block; }
+#photobar { display: none; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 50; font-size: 12px; padding: 6px 12px; }
+#immbtn { right: 16px; bottom: 110px; width: 44px; height: 40px; padding: 0; font-size: 18px; cursor: pointer; z-index: 40; }
+body.touch #immbtn { right: calc(16px + env(safe-area-inset-right)); bottom: calc(250px + env(safe-area-inset-bottom)); }
+.v78p { display: none; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 46; max-width: 92vw; max-height: 80vh; overflow: auto; min-width: 260px; }
+.v78p.on { display: block; }
+.v78p button { display: block; width: 100%; text-align: left; font: inherit; color: #3b1f10; background: #fff3d6; border: 3px solid #c58a45; padding: 6px 10px; margin: 4px 0; cursor: pointer; }
+.v78p button span { display: inline-block; width: 1.6em; }
+.v78p .close { text-align: center; margin-top: 8px; }
+.v78p .ab-body { font-size: 12px; line-height: 18px; color: #3b1f10; max-width: 420px; }
+body.compact #topleft { padding: 4px 8px; line-height: 16px; font-size: 12px; }
+body.compact #mmwrap { padding: 3px; }
+body.compact #minimap { width: 96px; }
+body.compact #quests { top: 72px; max-width: 140px; font-size: 11px; }
+body.compact #intro { max-width: 48vw; bottom: 120px; }

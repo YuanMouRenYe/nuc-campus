@@ -20,3 +20,10 @@ Not used:
 - Nothing was copied from https://exist.qd.je/pixel/, which has no licence. Only ideas and techniques were taken from it (see README).
 
 v2 adds no new third-party assets. v3 adds only the CC0 audio listed above.
+
+## v7.7
+- 地图编辑器、共享电单车与停车点、成就图标与提示、虚拟摇杆:全部为本项目代码程序绘制,无新增外部素材、字体或库,MIT。
+- 停车点运营方名称「杭州小潮出行」取自 2024-08 学校通知(仅作文字说明,未核实);停车点位置为游戏设定,未核实。
+
+## v7.8
+- UX 灵感（沉浸 / 拍照 / 备份 / 关于 / 地标传送 / 门口名牌 / 竖屏紧凑）参考同事 EXIST-D 的 PixelCampus（https://github.com/EXIST-D/PixelCampus）。该项目 LICENSE 为保留所有权利；本版本全部从零重写，**未复制其代码或美术**。详见 docs/LEARNED_FROM_PIXELCAMPUS.md。

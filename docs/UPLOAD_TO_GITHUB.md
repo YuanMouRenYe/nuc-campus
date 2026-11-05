@@ -1,6 +1,6 @@
 # 把本仓库上传到 GitHub
 
-压缩包 `nuc-campus-github-v7.6.4.zip` 里已经是一个完整的 git 仓库:分支 `main`,包含一次初始提交(作者 Jiarui Qi)和标签 `v7.6.4`。在另一台电脑上只需要**解压 → 设置身份 → 关联远程仓库 → 推送**。本仓库最大文件约 0.6 MB,不需要 Git LFS。
+压缩包 `nuc-campus-github-v7.8.zip` 里已经是一个完整的 git 仓库:分支 `main`,包含 v7.6.4 初始提交、v7.7 与 v7.8 提交(作者 Jiarui Qi)和标签 `v7.6.4`、`v7.8`。在另一台电脑上只需要**解压 → 设置身份 → 关联远程仓库 → 推送**。本仓库最大文件约 0.6 MB,不需要 Git LFS。
 
 ## 0. 解压
 把 zip 拷到另一台电脑,解压后进入 `nuc-campus` 文件夹(里面应能看到 `README.md`、`game/`,以及隐藏的 `.git/` 文件夹)。
@@ -21,7 +21,7 @@ git config --global user.email "你的GitHub邮箱或 noreply 邮箱"
 初始提交使用的是占位邮箱 `jiaruiqi@users.noreply.github.com`。如果想让提交显示为你的 GitHub 账号,在仓库目录里改作者后再推送(标签需要重新打):
 ```bash
 git commit --amend --reset-author --no-edit
-git tag -f -a v7.6.4 -m "v7.6.4"
+git tag -f -a v7.8 -m "v7.8"
 ```
 GitHub 的 noreply 邮箱在 Settings → Emails 里查看,格式为 `数字ID+用户名@users.noreply.github.com`。
 
@@ -77,7 +77,7 @@ GitHub 的 noreply 邮箱在 Settings → Emails 里查看,格式为 `数字ID+�
 
 ## 6. 推送后自检
 ```bash
-git log --oneline --decorate -3     # 应看到 (HEAD -> main, tag: v7.6.4, origin/main)
+git log --oneline --decorate -3     # 应看到 (HEAD -> main, tag: v7.8, origin/main)
 git status                          # working tree clean
 ```
-在 GitHub 网页上应能看到 README、`Releases/Tags` 中的 `v7.6.4`。
+在 GitHub 网页上应能看到 README、`Releases/Tags` 中的 `v7.8`。

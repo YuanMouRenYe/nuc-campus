@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>地图编辑器 · 中北大学像素校园</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="editor.css">
+</head>
+<body>
+<header id="bar">
+  <b class="logo">🗺 地图编辑器</b>
+  <span id="tools"></span>
+  <span class="sep"></span>
+  <button id="undo" title="撤销 Ctrl+Z">↶ 撤销</button><button id="redo" title="重做 Ctrl+Y">↷ 重做</button>
+  <span class="sep"></span>
+  <button id="save" class="pri" title="Ctrl+S：保存到浏览器，游戏下次打开就用修改后的地图">💾 保存到游戏</button>
+  <button id="export" title="导出 JSON（含地类 / 地形 / 建筑 / 门 / 树 / 碰撞修改）">⬇ 导出</button>
+  <label class="btn" title="导入之前导出的 JSON">⬆ 导入<input id="import" type="file" accept=".json,application/json" hidden></label>
+  <button id="reset" class="warn" title="删除浏览器里保存的修改，游戏恢复原始地图">⟲ 重置</button>
+  <button id="validate" title="检查台阶 / 门 / 可达性">✔ 检查</button>
+  <a class="btn" href="index.html" id="play">▶ 回到游戏</a>
+  <button id="helpbtn" title="快捷键 ?">❓ 帮助</button>
+</header>
+<aside id="pal"></aside>
+<main id="stage"><canvas id="cv"></canvas><div id="loading">正在读取地图数据…</div></main>
+<aside id="side">
+  <section><h3>图层</h3><div id="layers"></div></section>
+  <section><h3>笔刷</h3>
+    <div class="row">大小 <input id="size" type="range" min="1" max="40" value="4"> <span id="sizev">4</span>（¼ 格）</div>
+    <div class="row">层级 <button id="lvdn">−</button> <b id="lv">0</b> <button id="lvup">＋</button> <span class="small">草地 / 抬降用</span></div>
+    <div class="row small" id="pick"></div>
+  </section>
+  <section id="selbox"><h3>选中</h3><div id="sel" class="small">（用「选择」工具点建筑）</div></section>
+  <section><h3>检查结果</h3><div id="val" class="small">点「✔ 检查」或导出时自动检查</div></section>
+</aside>
+<footer id="status"></footer>
+<div id="help" class="modal"><div class="box">
+  <h2>地图编辑器 · 操作说明</h2>
+  <div class="cols">
+  <div><h4>视图</h4>滚轮 缩放 · 右键 / 中键 / 空格+拖动 平移<br>F 回到出生点 · 0 全图 · G 网格<br>1–9 / Shift+1–9 切换图层
+  <h4>工具</h4>
+  <kbd>B</kbd> 画笔 · <kbd>L</kbd> 直线（Shift 吸附 0/45/90°）<br><kbd>R</kbd> 矩形填充 · <kbd>E</kbd> 橡皮（改回草地）<br><kbd>I</kbd> 吸管（Alt+点击也可）<br>
+  <kbd>C</kbd> 碰撞开关（框选：设为不可走；Shift 框选：设为可走；再框一次同样区域撤销）<br>
+  <kbd>H</kbd> 抬高台地层级（框选 +1；Shift −1）· <kbd>K</kbd> 把框选设为当前层级<br>
+  <kbd>S</kbd> 拉直台阶（框住歪的台阶，自动规整成矩形，多余的台阶改回小径）<br>
+  <kbd>V</kbd> 选择：拖建筑=移动，拖角点=缩放，拖红点=移动门，Delete 删除<br><kbd>T</kbd> 树：点击种树，Shift 框选删除树</div>
+  <div><h4>编辑</h4><kbd>[</kbd> <kbd>]</kbd> 笔刷大小 · <kbd>,</kbd> <kbd>.</kbd> 层级 −/+<br>Ctrl+Z 撤销 · Ctrl+Y / Ctrl+Shift+Z 重做<br>Ctrl+S 保存到游戏 · Ctrl+E 导出<br>
+  <h4>常见用法</h4>
+  <b>拉直台阶</b>：S 工具框住整段台阶。<br><b>重画门口</b>：选「门前地砖」，R 矩形填充门前那块；再用 V 拖门的红点贴到墙边。<br>
+  <b>加宽 / 拉平道路</b>：选「道路」，L 直线按 Shift 画直，笔刷调宽；坡道用「清除坡道」刷掉，再 K 设为同一层级。<br>
+  <h4>保存</h4>「保存到游戏」写进本浏览器 localStorage，游戏启动时自动读取（顶部有提示）；「重置」恢复原图。要把修改正式放进 game/data，请看 docs/MAP_EDITOR.md。</div></div>
+  <button id="helpclose">知道了（Esc）</button></div></div>
+<script src="js/core.js"></script>
+<script src="js/legacy_art.js"></script>
+<script src="js/fields.js"></script>
+<script src="js/ground.js"></script>
+<script src="js/mapedit_core.js"></script>
+<script src="js/v77core.js"></script>
+<script src="js/editor.js"></script>
+</body>
+</html>

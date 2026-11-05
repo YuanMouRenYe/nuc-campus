@@ -13,14 +13,16 @@
   const cam = { x: 0, y: 0 };
 
   async function load() {
+    // v7.7: 地图编辑器的本地修改（localStorage 覆盖）优先；?pristine 跳过
+    const OV = window.MapEdit ? await MapEdit.loadOverride(window.localStorage, location.search) : null; S.mapOverride = !!OV;
     const [mj, gimg, eimg, simg, sm, , timg] = await Promise.all([
-      fetch('data/map.json').then(r => r.json()), img('data/ground.png'), img('data/elev.png').catch(() => null), img('assets/chars/students.png'), fetch('assets/chars/students.json').then(r => r.json()),
+      OV ? OV.map : fetch('data/map.json').then(r => r.json()), OV ? null : img('data/ground.png'), img('data/elev.png').catch(() => null), img('assets/chars/students.png'), fetch('assets/chars/students.json').then(r => r.json()),
       document.fonts ? document.fonts.load('12px ArkPixel', '中北大学') : 0, img('data/terrain.png').catch(() => null)]);
     M = mj; sheet = simg; sheetMeta = sm;
-    const c = document.createElement('canvas'); c.width = gimg.width; c.height = gimg.height; const g = c.getContext('2d'); g.drawImage(gimg, 0, 0);
-    const d = g.getImageData(0, 0, c.width, c.height).data; ground8 = new Uint8Array(c.width * c.height); for (let i = 0; i < ground8.length; i++) ground8[i] = d[i * 4];
+    if (OV) ground8 = OV.ground; else { const c = document.createElement('canvas'); c.width = gimg.width; c.height = gimg.height; const g = c.getContext('2d'); g.drawImage(gimg, 0, 0);
+    const d = g.getImageData(0, 0, c.width, c.height).data; ground8 = new Uint8Array(c.width * c.height); for (let i = 0; i < ground8.length; i++) ground8[i] = d[i * 4]; }
     if (eimg) { const e = document.createElement('canvas'); e.width = eimg.width; e.height = eimg.height; const eg = e.getContext('2d'); eg.drawImage(eimg, 0, 0); const ed = eg.getImageData(0, 0, e.width, e.height).data; elev8 = new Uint8Array(e.width * e.height); for (let i = 0; i < elev8.length; i++) elev8[i] = ed[i * 4]; }
-    if (timg) { const e = document.createElement('canvas'); e.width = timg.width; e.height = timg.height; const eg = e.getContext('2d'); eg.drawImage(timg, 0, 0); terr8 = eg.getImageData(0, 0, e.width, e.height).data; }
+    if (OV && OV.terr) terr8 = OV.terr; else if (timg) { const e = document.createElement('canvas'); e.width = timg.width; e.height = timg.height; const eg = e.getContext('2d'); eg.drawImage(timg, 0, 0); terr8 = eg.getImageData(0, 0, e.width, e.height).data; }
     ground = new Ground(ground8, M.meta, M.rails, { terrain: terr8, elev: elev8, fields: M.fields, fences: M.fences, crossings: M.crossings, bridges: [M.props && M.props.railBridge, M.props && M.props.v764 && M.props.v764.underpass].filter(Boolean), pave: M.pave, lots: (M.props && M.props.v764 && M.props.v764.lots) || [], ewStairs: (M.props && M.props.v764 && M.props.v764.ew_stairs) || [] });
     buildings = new Buildings(M.buildings); buildings.ground = ground8; buildings.meta = M.meta; // v7.1 road reveal
     // statics: ported statue + gate stone
@@ -139,6 +141,7 @@
     // The roof drawn lifted above it no longer blocks the ground north of the building (no roofShadow in collision).
     shadow = null;
     col = Core.buildCollision(ground8, M.meta, [], extra.concat(lamps.map(l => [l.x - 0.12, l.y - 0.15, l.x + 0.12, l.y]), Core.fenceRects(M.fences)), null);
+    if (window.MapEdit) MapEdit.applyCol(col, M); // v7.7: 编辑器里的碰撞开关
     makeNPCs();
     minimap = makeMinimap(1); mapBig = minimap;
     $('minimap').width = 504; $('minimap').height = 360;
@@ -169,7 +172,10 @@
     renderQuests();
     if (!Q.has('nosave')) { setInterval(save, 5000); addEventListener('beforeunload', save); document.addEventListener('visibilitychange', () => { if (document.hidden) save(); }); }
     if (S.loadedSave) toast('已读取存档：' + Core.clockText(Math.floor(S.minutes)), 2500);
-    window.__game = { pinch: () => pinch, S, player, cam, M, npcs, lamps, buildings, ready: true, prewarm, teleport, enterInterior, exitInterior, save, toast, setZoom, interact, drawFrame: () => frame(performance.now(), true), step: dt => { update(dt); } };
+    window.__game = { col: () => col, ground8: () => ground8, pinch: () => pinch, S, player, cam, M, npcs, lamps, buildings, ready: true, prewarm, teleport, enterInterior, exitInterior, save, toast, setZoom, interact, drawFrame: () => frame(performance.now(), true), step: dt => { update(dt); } };
+    if (window.V77) V77.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot });
+    if (window.V78) V78.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot, teleport, drawFrame: () => frame(performance.now(), true) });
+    if (S.mapOverride) toast('🗺 已载入地图编辑器的本地修改（编辑器里可「重置」；URL 加 ?pristine 临时查看原图）', 4000);
     requestAnimationFrame(loop);
   }
   function applyWeather(quiet) {
@@ -248,6 +254,7 @@
     for (const b of M.buildings) { g.fillStyle = b.enter || b.entry ? '#d9733f' : b.roof === 'red' ? '#b24a34' : '#8d8f96'; g.beginPath(); b.poly.forEach(([x, y], i) => i ? g.lineTo(x * scale, y * scale) : g.moveTo(x * scale, y * scale)); g.closePath(); g.fill(); }
     return c;
   }
+  addEventListener('orientationchange', () => setTimeout(resize, 120)); if (window.visualViewport) visualViewport.addEventListener('resize', () => resize());
   function resize() { const dpr = window.devicePixelRatio || 1; cv.width = Math.floor(innerWidth * dpr); cv.height = Math.floor(innerHeight * dpr); cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; S.dpr = dpr; }
   function scale() { return (S.mode === 'in' ? Math.max(1, S.zoom - 1) : S.zoom) * S.dpr; }
   function viewRect() { const s = scale(), w = cv.width / s, h = cv.height / s; return [cam.x - w / 2, cam.y - h / 2, cam.x + w / 2, cam.y + h / 2]; }
@@ -275,6 +282,8 @@
     if (k === 'n') S.minutes += 60;
     if (k === 'j') cycleSeason();
     if (k === 't') cycleWeather();
+    if (window.V78 && V78.key(k, e)) { e.preventDefault(); return; } // v7.8: Z 沉浸 · P 拍照 · Y 地标
+    if (window.V77 && V77.key(k, e)) { e.preventDefault(); return; } // v7.7: B 骑车 / 还车 · K 成就 · Tab 菜单
     if (k === 'escape') { S.showMap = false; S.dialog = null; }
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(k)) e.preventDefault();
   });
@@ -372,7 +381,8 @@
     if (pinch && e.touches.length >= 2) { const d = spread(e), st = Core.pinchStep(pinch.d, d); if (st && !S.showMap) { const z = Core.zoomStep(S.zoom, st); if (z !== S.zoom) setZoom(z); pinch.d = d; pinch.used = true; } }
     else if (touch) { const t = e.touches[0]; touch.dx = t.clientX - touch.x0; touch.dy = t.clientY - touch.y0; }
     e.preventDefault(); }, { passive: false });
-  cv.addEventListener('touchend', e => { if (pinch) { if (e.touches.length === 0) pinch = null; return; } if (touch && Math.hypot(touch.dx, touch.dy) < 8) interact(); touch = null; });
+  cv.addEventListener('touchend', e => { if (pinch) { if (e.touches.length === 0) pinch = null; return; } if (touch && Math.hypot(touch.dx, touch.dy) < 8) { // v7.7: 轻点 = 查看（代替鼠标悬停提示），没东西可看才互动
+      const t = e.changedTouches && e.changedTouches[0]; if (!(window.V77 && t && V77.tapInspect(t.clientX, t.clientY))) interact(); } touch = null; });
   cv.addEventListener('touchcancel', () => { touch = null; pinch = null; });
 
   { // on-screen E button for touch screens (also forced with ?touch=1)
@@ -383,6 +393,7 @@
     if (S.dialog) { S.dialog = null; return; }
     if (S.fadeDir) return;
     const h = S.hint; if (!h) return;
+    if (window.V77 && V77.interact(h)) return;
     if (h.kind === 'door') fadeTo(() => enterInterior(h.b.enter, h.b));
     else if (h.kind === 'info') S.dialog = h.info;
     else if (h.kind === 'pass') fadeTo(() => { const sp = freeSpot(h.pa.to.out[0], h.pa.to.out[1]) || h.pa.to.out; teleport(sp[0], sp[1]); Sound.step && Sound.step(); });
@@ -476,14 +487,15 @@
     if (K.has('a') || K.has('arrowleft')) ix -= 1; if (K.has('d') || K.has('arrowright')) ix += 1;
     if (K.has('w') || K.has('arrowup')) iy -= 1; if (K.has('s') || K.has('arrowdown')) iy += 1;
     if (touch && Math.hypot(touch.dx, touch.dy) > 12) { ix = touch.dx; iy = touch.dy; }
+    { const js = window.V77 && V77.stick(); if (js) { ix = js.x; iy = js.y; } } // v7.7 虚拟摇杆
     const L = Math.hypot(ix, iy); const grid = S.mode === 'out' ? col : S.interior.col;
     player.wantMove = L > 0;
-    player.moving = L > 0 && !S.dialog && !S.quiz && S.fadeDir === 0 && !S.showMap;
+    player.moving = L > 0 && !S.dialog && !S.quiz && S.fadeDir === 0 && !S.showMap && !(window.V78 && V78.frozen());
     if (player.moving) {
       ix /= L; iy /= L;
-      const sp = (K.has('shift') ? 9 : 5) * (S.mode === 'in' ? 0.8 : Core.slopeFactor(terr8, M.meta.w * M.meta.sub, M.meta.sub, player.x, player.y, ix, iy)) * dt; // v7.6.1: slower uphill on ramps
+      const sp = (window.V77 && V77.riding() ? V77.BIKE_SPEED * (K.has('shift') ? 1.2 : 1) : K.has('shift') ? 9 : 5) * (S.mode === 'in' ? 0.8 : Core.slopeFactor(terr8, M.meta.w * M.meta.sub, M.meta.sub, player.x, player.y, ix, iy)) * dt; // v7.6.1: slower uphill on ramps
       player.dir = Math.abs(ix) > Math.abs(iy) ? (ix < 0 ? 2 : 3) : (iy < 0 ? 1 : 0);
-      const p = Core.moveBox(grid, player, ix * sp, iy * sp, 0.3, 0.35); player.x = p.x; player.y = p.y;
+      const p = window.V77 && V77.riding() && S.mode === 'out' ? V77.rideMove(grid, player, ix * sp, iy * sp) : Core.moveBox(grid, player, ix * sp, iy * sp, 0.3, 0.35); player.x = p.x; player.y = p.y;
       player.anim += dt * (K.has('shift') ? 12 : 8);
     } else player.anim = 0;
     { const f = player.moving ? (Math.floor(player.anim) % 4) : 0;
@@ -503,9 +515,9 @@
         } else { n.moving = n.rnd() < 0.65; n.dir = (n.rnd() * 4) | 0; n.t = 1 + n.rnd() * 3; }
       }
       if (n.moving) {
-        const v = [[0, 1], [0, -1], [-1, 0], [1, 0]][n.dir], sp = 2.2 * dt;
-        const nx = n.x + v[0] * sp, ny = n.y + v[1] * sp;
-        const okClass = S.mode === 'in' || Core.PAVED.has(ground8[Math.floor(ny * 4) * M.meta.w * 4 + Math.floor(nx * 4)]);
+        const v = [[0, 1], [0, -1], [-1, 0], [1, 0]][n.dir], sp = (n.bike ? 4.6 : 2.2) * dt; // v7.7: 骑共享电动车的同学更快，只走道路
+        const nx = n.x + v[0] * sp, ny = n.y + v[1] * sp, cNext = ground8[Math.floor(ny * 4) * M.meta.w * 4 + Math.floor(nx * 4)];
+        const okClass = S.mode === 'in' || (n.bike ? window.V77Core.RIDE.has(cNext) : Core.PAVED.has(cNext));
         if (okClass && !Core.rectBlocked(grid, nx - 0.3, ny - 0.35, nx + 0.3, ny) && Math.hypot(nx - player.x, ny - player.y) > 0.8) { n.x = nx; n.y = ny; n.anim += dt * 7; }
         else { n.moving = false; n.t = 0.3; }
       }
@@ -538,6 +550,7 @@
       let best = null, bd = 1.5; for (const n of list) { if (n.hidden) continue; const dd = Math.hypot(n.x - player.x, n.y - player.y); if (dd < bd) { bd = dd; best = n; } }
       if (best && (!S.hint || S.hint.kind === 'info' || (bd < 1.0 && S.hint.kind !== 'buy' && S.hint.kind !== 'borrow'))) S.hint = { kind: 'talk', n: best, text: '按 E 交谈' };
     }
+    if (window.V77) V77.tick(dt); // v7.7: 成就 / 停车点提示
     // quests
     { const it = S.interior, qc = S.mode === 'in' ? { mode: 'in', key: it.def.canteen ? (it.def.canteen === 1 ? 'canteen' : 'canteen2') : it.key, name: it.from && it.from.name, x: player.x, y: player.y, action: S.action, dish: S.dish } : { mode: 'out', x: player.x, y: player.y };
       { const e = Core.questsRoll(S.quests, Math.floor(S.minutes / 1440)); if (e) { toast(`📅 第 ${e.d} 天结束：完成 ${e.n}/${e.t} 个任务 —— 第 ${Math.floor(S.minutes / 1440) + 1} 天的新任务来了！`, 5000); renderQuests(); save(); } }
@@ -547,9 +560,11 @@
         for (const id of got) { const q = Core.QUEST_POOL.find(q => q.id === id), n = list.filter(t => S.quests.done[t.id] != null).length; toast(`✔ 任务完成：${q.text} —— ${q.done}${n === list.length ? '　🎉 今日任务全部完成！' : ''}`, 5000); Sound.chime(); renderQuests(); save(); } } }
     if (S.frame % 30 === 0) applyWeather(false); // new day -> new weather roll
     Sound.ambience(Core.nightness(S.minutes), S.mode === 'in', S.weather, S.season);
-    // camera
-    const U = S.mode === 'out' ? T : IT, tx = player.x * U, ty = player.y * U - 10, k = 1 - Math.exp(-dt * 9);
-    cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; clampCam();
+    // camera（v7.8 拍照模式：相机自由平移，不跟玩家）
+    if (window.V78 && V78.frozen()) { const c = V78.photoCam(dt, S.keys, cam); if (c) { cam.x = c.x; cam.y = c.y; } clampCam(); }
+    else { const U = S.mode === 'out' ? T : IT, tx = player.x * U, ty = player.y * U - 10, k = 1 - Math.exp(-dt * 9);
+      cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; clampCam(); }
+    if (window.V78) V78.tick();
   }
 
   function surfaceAt() {
@@ -563,6 +578,7 @@
     const x = Math.round(wx - sheetMeta.footX), y = Math.round(wy - sheetMeta.footY);
     if (alpha == null) { g.fillStyle = 'rgba(30,40,20,0.28)'; g.fillRect(Math.round(wx) - 6, Math.round(wy) - 2, 12, 3); g.fillRect(Math.round(wx) - 4, Math.round(wy) - 3, 8, 5); }
     if (c.seated) { g.drawImage(sheet, 0, row * fh, fw, fh - 13, x, y + 6, fw, fh - 13); return; }
+    if (window.V77 && (c.bike || (c === player && V77.riding()))) { V77.drawRider(g, c, wx, wy, sheet, sheetMeta, row); return; } // v7.7 骑车的人
     g.drawImage(sheet, c.frame * fw, row * fh, fw, fh, x, y, fw, fh);
     if (alpha == null && S.weather === 'rain' && S.mode === 'out') umbrella(g, Math.round(wx), y + 2, c.variant);
   }
@@ -657,6 +673,8 @@
     for (const w of wallPcs) { const wx0 = Math.min(w.x0, w.x1), wx1 = Math.max(w.x0, w.x1); if (wx1 > x0 - 20 && wx0 < x1 + 20 && w.sy > y0 && w.sy < y1 + 40) spr.push({ y: w.sy, wall: w }); }
     for (const n of npcs) { if (n.hidden) continue; const wx = n.x * T, wy = n.y * T; if (wx > x0 - 20 && wx < x1 + 20 && wy > y0 && wy < y1 + 40) spr.push({ y: wy, ch: n }); }
     for (const u of window.__morning || []) { const wx = u.x * T, wy = u.y * T; if (wx > x0 - 20 && wx < x1 + 20 && wy > y0 && wy < y1 + 40) spr.push({ y: wy, uni: u }); }
+    if (window.V77) V77.sprites(spr, x0, y0, x1, y1);
+    if (window.V78) V78.sprites(spr, x0, y0, x1, y1);
     spr.push({ y: player.y * T, ch: player, me: true });
     spr.sort((a, b) => a.y - b.y);
     const px = player.x * T, py = player.y * T, ls = Props.lampSprite.cached || (Props.lampSprite.cached = Props.lampSprite());
@@ -679,6 +697,8 @@
         if (!cut) o.lamp.alpha = a; if (a < 1) g.globalAlpha = a; g.drawImage(ls.cv, X, Y); g.globalAlpha = 1; }
       else if (o.st) { const sp = o.st.frames ? o.st.frames[(S.frame >> 3) % o.st.frames.length] : o.st.spr, X = Math.round(o.st.x * T - sp.ax), Y = Math.round(o.st.y * T - sp.ay);
         if (o.st.fade && !cut && o.y > py && overlapsMe(X + 4, Y, sp.cv.width - 8, sp.cv.height - 4)) g.globalAlpha = 0.4; g.drawImage(sp.cv, X, Y); g.globalAlpha = 1; }
+      else if (o.v77) { if (!cut) V77.paint(g, o); }
+      else if (o.v78) { if (!cut) V78.paint(g, o); }
       else if (o.uni) { const u = o.uni, sp = window.PropsV764.uniformSprite(u.dir, u.frame, u.guard); g.drawImage(sp.cv, Math.round(u.x * T - sp.ax), Math.round(u.y * T - sp.ay)); }
       else if (o.ch) drawChar(g, o.ch, o.ch.x * T, o.ch.y * T - Core.stairLift(STAIRS, o.ch.x, o.ch.y), cut ? 1 : undefined);
     };
@@ -862,7 +882,7 @@
     setText('area', areaName());
     const h = S.dialog ? S.dialog : (S.hint ? S.hint.text : '');
     setText('hint', h); $('hint').style.display = h ? 'block' : 'none';
-    { const eb = $('ebtn'); if (eb) { const lab = S.dialog ? '关闭' : !S.hint ? '' : ({ door: '进入', talk: '交谈', info: '查看', stairs: '楼梯' })[S.hint.kind] || ''; setText('ebtnlab', lab); eb.classList.toggle('on', !!lab); } }
+    { const eb = $('ebtn'); if (eb) { const lab = S.dialog ? '关闭' : !S.hint ? '' : ({ door: '进入', talk: '交谈', info: '查看', stairs: '楼梯', ride: '骑车', park: '还车' })[S.hint.kind] || ''; setText('ebtnlab', lab); eb.classList.toggle('on', !!lab); } }
     if (S.dialog) $('hint').classList.add('dialog'); else $('hint').classList.remove('dialog');
     $('bigwrap').style.display = S.showMap ? 'flex' : 'none';
     $('mmwrap').style.display = S.mode === 'in' ? 'none' : '';
