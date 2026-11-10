@@ -27,3 +27,33 @@ kbd { font: 10px monospace; background: #fff3d6; border: 1px solid #c58a45; padd
 .modal.on { display: flex; } .modal .box { background: #f7e3b0; border: 4px solid #6b3a1e; box-shadow: inset 0 0 0 3px #d79b4a; padding: 12px 18px; max-width: 900px; max-height: 90vh; overflow: auto; line-height: 20px; }
 .modal h2 { margin: 0 0 8px; color: #6a1f12; } .modal h4 { margin: 8px 0 2px; color: #7a4320; } .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
 @media (max-width: 900px) { body { grid-template-columns: 150px 1fr; grid-template-areas: 'bar bar' 'pal stage' 'st st'; } #side { display: none; } }
+
+/* v7.9 编辑器触控 / 小屏 */
+.ednote { position: fixed; left: 50%; top: 20%; transform: translateX(-50%); z-index: 100; max-width: 90vw; text-align: center; }
+.ednote .btn, .ednote button { min-height: 44px; margin: 6px; font: inherit; padding: 8px 14px; }
+body.editor-mobile #top { flex-wrap: wrap; gap: 4px; max-height: none; }
+body.editor-mobile #top button, body.editor-mobile #top .btn { min-height: 40px; min-width: 40px; font-size: 13px; padding: 6px 8px; }
+body.phone.editor-mobile #left, body.phone.editor-mobile #right {
+  position: fixed; z-index: 40; background: #f7e3b0; max-height: 42vh; overflow: auto;
+  border: 3px solid #6b3a1e;
+}
+body.phone.editor-mobile #left { left: 0; bottom: 0; width: 46vw; }
+body.phone.editor-mobile #right { right: 0; bottom: 0; width: 46vw; }
+body.phone.editor-mobile #stage { left: 0; right: 0; bottom: 42vh; }
+body.editor-mobile #cv { touch-action: none; }
+
+/* v7.9 管理员发布 */
+.admin-only[hidden] { display: none !important; }
+#pubLocal, #pubGh { background: #cfe8a6; }
+.admin-box { max-width: min(560px, 96vw); max-height: 90vh; overflow: auto; }
+.admin-box h4 { margin: 12px 0 4px; color: #6a1f12; }
+.admin-box .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 6px 0; font-size: 13px; }
+.admin-box input[type=text], .admin-box input[type=password] {
+  flex: 1 1 180px; min-height: 40px; font: inherit; padding: 6px 8px; border: 2px solid #6b3a1e; background: #fff8e8;
+}
+.admin-box .gap { margin-top: 12px; }
+.adm-log { background: #fff3d6; border: 1px solid #c58a45; padding: 8px; max-height: 160px; overflow: auto; white-space: pre-wrap; }
+#bar button.pri { font-weight: bold; }
+
+#admin.modal { display:none; }
+#admin.modal.on { display:flex; }

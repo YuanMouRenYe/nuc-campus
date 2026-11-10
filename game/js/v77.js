@@ -46,7 +46,7 @@
 
   // ---------- DOM ----------
   function el(tag, id, cls, html, parent) { const e = document.createElement(tag); if (id) e.id = id; if (cls) e.className = cls; if (html != null) e.innerHTML = html; (parent || document.body).appendChild(e); return e; }
-  const isTouch = () => !!(Q.get('touch') || matchMedia('(pointer: coarse)').matches);
+  const isTouch = () => window.InputMode ? InputMode.effectiveTouch() : !!(Q.get('touch') || matchMedia('(pointer: coarse)').matches);
   function buildUI() {
     el('div', 'achtoast', 'panel', '<div class="ai"></div><div class="ab"><div class="ah">成就达成！</div><div class="an"></div><div class="ad"></div></div>');
     el('div', 'achpanel', 'panel', '');
@@ -59,7 +59,8 @@
     tapBtn(el('button', 'menubtn', 'panel', '☰'), () => menu.classList.toggle('on'));
     const rb = el('button', 'ridebtn', 'panel', '<b>🛵</b><span>骑车</span>'); tapBtn(rb, () => toggleRide());
     const joy = el('div', 'joy', '', '<div id="joyknob"></div>'); joyInit(joy);
-    if (isTouch()) document.body.classList.add('touch');
+    if (window.InputMode) InputMode.init({ search: location.search });
+    else if (isTouch()) document.body.classList.add('touch');
     for (const ev of ['gesturestart', 'gesturechange', 'dblclick']) document.addEventListener(ev, e => e.preventDefault(), { passive: false });
     document.addEventListener('touchmove', e => { if (e.touches.length > 1 || e.target === document.body) e.preventDefault(); }, { passive: false });
   }

@@ -114,3 +114,159 @@ body.compact #mmwrap { padding: 3px; }
 body.compact #minimap { width: 96px; }
 body.compact #quests { top: 72px; max-width: 140px; font-size: 11px; }
 body.compact #intro { max-width: 48vw; bottom: 120px; }
+
+/* ========== v7.9 手机 / 平板适配 ========== */
+html, body { width: 100%; height: 100%; height: 100dvh; }
+#view { width: 100%; height: 100%; height: 100dvh; }
+
+/* 触控目标与字体下限 */
+body.touch .panel { font-size: 14px; }
+body.touch #clock { font-size: 14px; }
+body.touch #area { font-size: 12px; } /* 次要信息可略小 */
+body.touch #quests { font-size: 14px; max-width: min(220px, 56vw); top: calc(12px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); }
+body.touch #topleft { top: calc(10px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); padding: 6px 10px; line-height: 20px; z-index: 25; }
+body.touch #mmwrap { top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); padding: 4px; z-index: 25; }
+body.touch #minimap { width: 108px; }
+body.phone #minimap { width: 96px; }
+body.touch #toast { top: calc(12px + env(safe-area-inset-top)); z-index: 50; max-width: 92vw; white-space: normal; text-align: center; }
+body.touch #achtoast { top: calc(56px + env(safe-area-inset-top)); min-width: 0; width: min(340px, 92vw); }
+body.touch #achtoast:not(.on) { transform: translate(-50%, calc(-120% - env(safe-area-inset-top))); }
+
+/* 隐藏桌面帮助；手机用菜单说明 */
+body.touch #help { display: none !important; }
+
+/* 右下控件：只保留 ☰ + 情境 FAB；mute/ride/imm 收进菜单 */
+body.touch #ridebtn, body.touch #immbtn, body.touch #mute, body.touch #ebtn { display: none !important; }
+body.touch #fab {
+  display: none; flex-direction: column; align-items: center; justify-content: center;
+  position: fixed; z-index: 30;
+  right: calc(16px + env(safe-area-inset-right));
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  width: 72px; height: 72px; min-width: 72px; min-height: 72px;
+  border-radius: 50%; padding: 0; opacity: .92;
+  touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+}
+body.touch #fab b { font-size: 26px; line-height: 28px; font-weight: normal; }
+body.touch #fab span { font-size: 13px; }
+body.touch #fab.on { display: flex; background: #ffe9a8; }
+body.touch #menubtn {
+  display: flex !important; align-items: center; justify-content: center;
+  right: calc(18px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 56px; height: 56px; min-width: 56px; min-height: 56px; font-size: 26px; z-index: 30;
+  touch-action: manipulation;
+}
+
+/* 摇杆：避开安全区；横屏缩小并贴左下 */
+body.touch #joy {
+  display: block; position: fixed; z-index: 28;
+  left: calc(14px + env(safe-area-inset-left));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  width: 128px; height: 128px; min-width: 128px; min-height: 128px;
+  border-radius: 50%; background: rgba(247,227,176,.32); border: 4px solid rgba(107,58,30,.7);
+  box-shadow: inset 0 0 0 3px rgba(215,155,74,.45); touch-action: none;
+}
+body.touch #joyknob { width: 52px; height: 52px; margin: -26px 0 0 -26px; }
+body.touch.land #joy { width: 108px; height: 108px; min-width: 108px; min-height: 108px; bottom: calc(10px + env(safe-area-inset-bottom)); }
+body.touch.land #joyknob { width: 44px; height: 44px; margin: -22px 0 0 -22px; }
+body.touch.land #fab { bottom: calc(78px + env(safe-area-inset-bottom)); width: 64px; height: 64px; min-width: 64px; min-height: 64px; }
+body.touch.land #menubtn { bottom: calc(10px + env(safe-area-inset-bottom)); }
+
+/* 提示 / 介绍：抬到控件上方，避免被摇杆挡住 */
+body.touch #hint {
+  left: 50%; transform: translateX(-50%);
+  bottom: calc(168px + env(safe-area-inset-bottom));
+  max-width: min(92vw, 420px); white-space: normal; text-align: center; z-index: 26;
+  font-size: 14px; padding: 8px 12px;
+}
+body.touch #intro {
+  left: calc(10px + env(safe-area-inset-left));
+  bottom: calc(168px + env(safe-area-inset-bottom));
+  max-width: min(70vw, 280px); z-index: 24; font-size: 14px;
+}
+body.touch #intro .it { font-size: 16px; }
+body.touch #intro .ib { font-size: 13px; line-height: 18px; max-height: 4.5em; overflow: hidden; }
+body.touch.land #hint, body.touch.land #intro { bottom: calc(14px + env(safe-area-inset-bottom)); max-width: 42vw; }
+body.touch.land #intro .ib { display: none; }
+body.phone #quests.min, body.phone #quests { max-height: 28vh; overflow: auto; }
+body.phone #quests:not(.min) { max-height: 36vh; }
+
+/* 底部抽屉（菜单 / 成就 / 传送 / 关于） */
+body.touch #menu, body.touch #achpanel, body.touch #tp, body.touch #about, body.touch .v78p {
+  left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+  transform: none !important;
+  width: 100% !important; max-width: 100% !important;
+  max-height: min(78dvh, 78vh); border-radius: 16px 16px 0 0;
+  padding: 8px 14px calc(14px + env(safe-area-inset-bottom));
+  overflow: hidden; display: none; z-index: 60;
+  box-sizing: border-box;
+}
+body.touch #menu.on, body.touch #achpanel.on, body.touch #tp.on, body.touch #about.on,
+body.touch #menu.sheet-on, body.touch #achpanel.sheet-on, body.touch #tp.sheet-on, body.touch #about.sheet-on {
+  display: flex !important; flex-direction: column;
+}
+body.touch .sheet-handle {
+  width: 42px; height: 5px; border-radius: 3px; background: #c58a45; margin: 4px auto 8px; flex: 0 0 auto;
+}
+body.touch .sheet-body { overflow: auto; -webkit-overflow-scrolling: touch; flex: 1 1 auto; overscroll-behavior: contain; }
+body.touch #menu button, body.touch #tp button, body.touch #achpanel .close, body.touch .sheet-close, body.touch #about .sheet-close {
+  min-height: 48px; font-size: 16px; padding: 10px 12px; margin: 4px 0;
+  touch-action: manipulation; width: 100%; box-sizing: border-box;
+}
+body.touch .sheet-close { text-align: center; background: #e9c47a !important; margin-top: 8px; flex: 0 0 auto; }
+body.touch #achpanel .ar { font-size: 14px; min-height: 44px; }
+body.sheet-open #joy, body.sheet-open #fab, body.sheet-open #menubtn { pointer-events: none; opacity: .35; }
+
+/* 沉浸：手机仍留 ☰ 与 FAB（淡） */
+body.touch.immersive #topleft, body.touch.immersive #quests, body.touch.immersive #mmwrap,
+body.touch.immersive #intro, body.touch.immersive #achtoast { opacity: 0; pointer-events: none; }
+body.touch.immersive #menubtn, body.touch.immersive #fab, body.touch.immersive #joy { opacity: .4; pointer-events: auto; }
+
+/* 拍照 UI */
+#photoui { display: none; position: fixed; left: 0; right: 0; bottom: 0; z-index: 55;
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, rgba(32,20,12,.72)); pointer-events: none; }
+body.photo #photoui { display: block; pointer-events: auto; }
+body.photo #photobar { display: none !important; }
+.ph-row { display: flex; gap: 10px; align-items: center; justify-content: center; }
+.ph-btn, .ph-snap {
+  pointer-events: auto; font: inherit; color: #3b1f10; background: #f7e3b0; border: 3px solid #6b3a1e;
+  border-radius: 12px; min-width: 48px; min-height: 48px; padding: 8px 14px; font-size: 18px;
+  touch-action: manipulation;
+}
+.ph-snap { width: 72px; height: 72px; border-radius: 50%; font-size: 28px; background: #ffe9a8; }
+.ph-hint { text-align: center; color: #f7e3b0; font-size: 13px; margin-top: 6px; font-family: ArkPixel, sans-serif; }
+body.photo #fab { display: none !important; }
+body.photo #joy { opacity: 0; pointer-events: none; }
+
+/* 暂停 */
+.pauseov { display: none; position: fixed; inset: 0; z-index: 80; background: rgba(20,12,6,.55);
+  align-items: center; justify-content: center; }
+body.paused .pauseov { display: flex; }
+
+/* tip 在触屏可见且不溢出 */
+body.touch #tip, body.touch #tip.tap { display: block; max-width: min(280px, 86vw); font-size: 14px; z-index: 45; }
+@media (hover: none) { #tip.tap { display: block; } }
+
+/* 测验全屏一点 */
+body.touch #quiz {
+  left: 0; right: 0; top: auto; bottom: 0; transform: none;
+  width: 100%; max-width: 100%; min-width: 0; max-height: 80dvh; overflow: auto;
+  border-radius: 16px 16px 0 0; padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+body.touch #quiz .opt { min-height: 48px; font-size: 16px; }
+
+/* 大地图在手机全屏 */
+body.touch #bigwrap .big { max-width: 100vw; max-height: 100dvh; width: 100%; box-sizing: border-box; border-radius: 0; }
+body.touch #bigmap { width: 100% !important; max-height: calc(100dvh - 80px); }
+
+/* 平板：稍宽抽屉 */
+body.tablet #menu, body.tablet #achpanel, body.tablet #tp, body.tablet #about {
+  left: 50% !important; right: auto !important; width: min(480px, 100%) !important;
+  transform: translateX(-50%) !important; border-radius: 16px 16px 0 0;
+}
+
+/* v7.9.1 操作模式 / 混合键鼠 */
+body.hybrid #tip { display: block !important; }
+body:not(.touch) #fab, body:not(.touch) #joy { display: none !important; }

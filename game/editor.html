@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>地图编辑器 · 中北大学像素校园</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="editor.css">
@@ -16,6 +16,9 @@
   <span class="sep"></span>
   <button id="save" class="pri" title="Ctrl+S：保存到浏览器，游戏下次打开就用修改后的地图">💾 保存到游戏</button>
   <button id="export" title="导出 JSON（含地类 / 地形 / 建筑 / 门 / 树 / 碰撞修改）">⬇ 导出</button>
+  <button id="pubLocal" class="pri admin-only" hidden title="写到本机 game/data（需 npm run admin）">☁ 发布到项目</button>
+  <button id="pubGh" class="pri admin-only" hidden title="提交到 GitHub，触发 Pages 重新部署">🐙 发布到 GitHub</button>
+  <button id="adminCfg" title="管理员：本地令牌 / GitHub PAT">⚙ 管理员</button>
   <label class="btn" title="导入之前导出的 JSON">⬆ 导入<input id="import" type="file" accept=".json,application/json" hidden></label>
   <button id="reset" class="warn" title="删除浏览器里保存的修改，游戏恢复原始地图">⟲ 重置</button>
   <button id="validate" title="检查台阶 / 门 / 可达性">✔ 检查</button>
@@ -49,14 +52,40 @@
   <h4>常见用法</h4>
   <b>拉直台阶</b>：S 工具框住整段台阶。<br><b>重画门口</b>：选「门前地砖」，R 矩形填充门前那块；再用 V 拖门的红点贴到墙边。<br>
   <b>加宽 / 拉平道路</b>：选「道路」，L 直线按 Shift 画直，笔刷调宽；坡道用「清除坡道」刷掉，再 K 设为同一层级。<br>
-  <h4>保存</h4>「保存到游戏」写进本浏览器 localStorage，游戏启动时自动读取（顶部有提示）；「重置」恢复原图。要把修改正式放进 game/data，请看 docs/MAP_EDITOR.md。</div></div>
+  <h4>保存</h4>「保存到游戏」写进本浏览器 localStorage；「发布到项目」需本机 <code>npm run admin</code>；「发布到 GitHub」需 fine-grained PAT。详见 docs/ADMIN_PUBLISH.md 与 docs/MAP_EDITOR.md。</div></div>
   <button id="helpclose">知道了（Esc）</button></div></div>
+<div id="admin" class="modal" hidden><div class="box admin-box">
+  <h2>管理员设置</h2>
+  <p class="small">令牌<strong>只存在本浏览器</strong>，不会写进地图文件或仓库。访客看不到发布按钮。</p>
+  <h4>A · 本地管理员（npm run admin）</h4>
+  <p class="small">终端会打印一串令牌。粘贴到下方后，「发布到项目」会把地图写进本机 <code>game/data/</code>。</p>
+  <label class="row">本地令牌 <input id="admToken" type="password" autocomplete="off" placeholder="启动 admin 时终端打印的令牌"></label>
+  <label class="row">服务地址 <input id="admBase" type="text" value="" placeholder="默认当前站点（127.0.0.1:8790）"></label>
+  <div class="row"><button type="button" id="admPing">检测本地服务</button> <span id="admPingR" class="small"></span></div>
+  <h4>B · GitHub 在线发布</h4>
+  <p class="small">需要 fine-grained PAT，权限仅 Contents: Read and write，且只授权本仓库。步骤见 docs/ADMIN_PUBLISH.md。</p>
+  <label class="row">仓库 <input id="ghRepo" type="text" placeholder="owner/name，例如 jiaruiqi/nuc-campus"></label>
+  <label class="row">分支 <input id="ghBranch" type="text" value="main"></label>
+  <label class="row">路径前缀 <input id="ghPrefix" type="text" placeholder="可选；仓库根目录留空"></label>
+  <label class="row">PAT <input id="ghToken" type="password" autocomplete="off" placeholder="github_pat_…（不会上传到别处）"></label>
+  <div class="row gap">
+    <button type="button" id="admSave" class="pri">保存设置</button>
+    <button type="button" id="admClear" class="warn">退出管理员 / 清除令牌</button>
+    <button type="button" id="admClose">关闭</button>
+  </div>
+  <pre id="admLog" class="small adm-log"></pre>
+</div></div>
 <script src="js/core.js"></script>
 <script src="js/legacy_art.js"></script>
 <script src="js/fields.js"></script>
 <script src="js/ground.js"></script>
 <script src="js/mapedit_core.js"></script>
+<script src="js/admin_files.js"></script>
+<script src="js/admin_github.js"></script>
 <script src="js/v77core.js"></script>
+<script src="js/input_mode.js"></script>
+<script src="js/v79core.js"></script>
+<script src="js/v79.js"></script>
 <script src="js/editor.js"></script>
 </body>
 </html>

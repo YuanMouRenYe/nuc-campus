@@ -26,7 +26,7 @@
     if (A && A.S.mode !== 'out') { A.toast('室内暂不支持拍照模式', 1500); return; }
     photo = true; camX = A.cam.x; camY = A.cam.y;
     document.body.classList.add('photo'); document.body.classList.add('immersive');
-    A.toast('📷 拍照模式：WASD / 拖动平移，滚轮缩放，Enter / 空格拍照保存，Esc 退出', 3500);
+    A.toast(document.body.classList.contains('touch') ? '📷 拍照：拖动画布平移，点快门保存，☰ 旁退出' : '📷 拍照模式：WASD / 拖动平移，滚轮缩放，Enter / 空格拍照保存，Esc 退出', 3500);
   }
 
   function snapPhoto() {
@@ -164,7 +164,7 @@
   window.V78 = {
     init(api) {
       A = api; buildUI();
-      window.__v78 = { photo: () => photo, immersive: () => pref.immersive, landmarks: VC.LANDMARKS, exportBackup, pack: VC.packBackup, unpack: VC.unpackBackup, nearDoor: VC.nearDoor, togglePhoto, setImmersive, snapPhoto };
+      window.__v78 = { photo: () => photo, immersive: () => pref.immersive, landmarks: VC.LANDMARKS, exportBackup, pack: VC.packBackup, unpack: VC.unpackBackup, nearDoor: VC.nearDoor, togglePhoto, setImmersive, snapPhoto, _setCam: (x, y) => { camX = x; camY = y; } };
     },
     frozen: () => photo,
     photoCam(dt, keys, cam) {

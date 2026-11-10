@@ -1,4 +1,4 @@
-# 中北大学 · 像素校园漫步 (nuc-campus) v7.8
+# 中北大学 · 像素校园漫步 (nuc-campus) v7.9.1
 
 一个俯视角(3/4 视角)像素风的中北大学(太原)校园漫步游戏。纯静态 HTML5 Canvas,无构建步骤、无运行时依赖。
 
@@ -15,6 +15,9 @@
 - **v7.7 地图编辑器**:`game/editor.html`,画笔 / 直线 / 矩形 / 橡皮 / 吸管、碰撞开关、抬高降低台地、移动缩放删除建筑和门、一键拉直台阶、撤销重做、检查、导出导入,详见 [docs/MAP_EDITOR.md](docs/MAP_EDITOR.md)。
 - **v7.7 二龙山成就**:山门、一人亭、石碑三处打卡和登顶,解锁时弹出提示,K 打开成就面板。
 - **v7.7 共享电单车**:16 个停车点(位置未核实),B 上车 / 还车,只能在路上骑,部分学生也骑车。
+- **v7.9.1 操作模式**：菜单可切换「自动 / 电脑 / 触屏」，统一探测模块 `input_mode.js`，支持键鼠混合；桌面 e2e 回归。
+- **v7.9 管理员发布**：本地 `npm run admin` 一键写入 `game/data`；或配置 fine-grained PAT「发布到 GitHub」。详见 [docs/ADMIN_PUBLISH.md](docs/ADMIN_PUBLISH.md)。
+- **v7.9 手机适配**：情境主按钮、底部抽屉菜单、刘海安全区、拍照快门与 iOS 分享保存、DPR≤2；详见 [docs/MOBILE_AUDIT.md](docs/MOBILE_AUDIT.md)。
 - **v7.8 沉浸 / 拍照 / 备份 / 地标**：Z 沉浸模式、P 拍照（带本游戏水印）、Y 地标传送、存档导出导入、门口名牌；UX 灵感来自同事 PixelCampus（仅学想法，未复制代码，见 [docs/LEARNED_FROM_PIXELCAMPUS.md](docs/LEARNED_FROM_PIXELCAMPUS.md)）。
 - **v7.7 手机操作**:虚拟摇杆、触屏按钮、轻点查看介绍,竖屏横屏都能玩。
 - **音效**:脚步、上下课铃、鸟鸣 / 虫鸣 / 雨声(均为 CC0)。存档保存在浏览器 localStorage。
@@ -57,7 +60,7 @@ cd game && python3 -m http.server 8090
 ```bash
 npm test            # 仓库根目录;等价于 cd game && npm test
 ```
-当前结果:150 个测试,146 通过,0 失败,4 跳过(v7.3 南侧大台阶已在 v7.6.4 中移除,对应用例跳过)。
+当前结果:166 个测试,162 通过,0 失败,4 跳过(v7.3 南侧大台阶已在 v7.6.4 中移除,对应用例跳过)。
 
 ## 目录结构
 ```

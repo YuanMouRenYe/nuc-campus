@@ -4,5 +4,9 @@
   "private": true,
   "description": "中北大学像素校园漫步 — static HTML5 canvas game",
   "license": "MIT",
-  "scripts": { "start": "npx serve -l 8080 .", "test": "node --test tests/*.test.cjs" }
+  "scripts": {
+    "start": "npx serve -l 8080 .",
+    "test": "node --test tests/*.test.cjs",
+    "admin": "node ../tools/admin_server.cjs"
+  }
 }

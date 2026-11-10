@@ -26,7 +26,7 @@
   const WATERMARK = '中北大学 · 像素校园漫步';
   const ABOUT = {
     name: '中北大学 · 像素校园漫步',
-    version: '7.8',
+    version: '7.9.1',
     license: 'MIT',
     author: 'Jiarui Qi',
     repoNote: '本仓库以 MIT 许可发布。',

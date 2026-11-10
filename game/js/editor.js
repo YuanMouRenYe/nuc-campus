@@ -170,6 +170,7 @@
     for (const c of $('layers').querySelectorAll('input')) c.onchange = () => { on[c.dataset.l] = c.checked; need = true; };
     $('size').oninput = e => { size = +e.target.value; ui(); }; $('lvup').onclick = () => { level = Math.min(7, level + 1); ui(); }; $('lvdn').onclick = () => { level = Math.max(0, level - 1); ui(); };
     $('undo').onclick = undo; $('redo').onclick = redo; $('save').onclick = save; $('export').onclick = exportJSON; $('reset').onclick = reset; $('validate').onclick = runValidate;
+    adminInit();
     $('import').onchange = e => { const f = e.target.files[0]; if (f) importFile(f); e.target.value = ''; };
     $('helpbtn').onclick = () => $('help').classList.add('on'); $('helpclose').onclick = () => $('help').classList.remove('on');
     $('play').onclick = e => { if (!saved && !confirm('还有没保存到游戏的修改。直接回到游戏吗？（游戏会用上一次保存的版本）')) e.preventDefault(); };
@@ -182,7 +183,7 @@
     if (ctl && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); return; } if (ctl && k === 'y') { e.preventDefault(); redo(); return; }
     if (ctl && k === 's') { e.preventDefault(); save(); return; } if (ctl && k === 'e') { e.preventDefault(); exportJSON(); return; } if (ctl) return;
     if (e.code === 'Space') { spaceDown = true; e.preventDefault(); return; }
-    if (k === 'escape') { $('help').classList.remove('on'); drag = null; sel = -1; ui(); need = true; return; } if (k === '?' || k === '/') { $('help').classList.toggle('on'); return; }
+    if (k === 'escape') { $('help').classList.remove('on'); closeAdmin && closeAdmin(); drag = null; sel = -1; ui(); need = true; return; } if (k === '?' || k === '/') { $('help').classList.toggle('on'); return; }
     const t = TOOLS.find(x => x[2].toLowerCase() === k); if (t) { setTool(t[0]); return; }
     if (k === '[') { size = Math.max(1, size - 1); ui(); } else if (k === ']') { size = Math.min(40, size + 1); ui(); } else if (k === ',') { level = Math.max(0, level - 1); ui(); } else if (k === '.') { level = Math.min(7, level + 1); ui(); }
     else if (k === 'delete' || k === 'backspace') deleteSel(); else if (k === 'f') { view.x = M.spawn[0] * T; view.y = M.spawn[1] * T; view.z = 1; need = true; } else if (k === '0') { view.x = st.gw * 2; view.y = st.gh * 2; view.z = Math.min(cv.width / (st.gw * 4), cv.height / (st.gh * 4)) / dpr(); need = true; }
@@ -197,5 +198,156 @@
     let s = `缩放 ${view.z.toFixed(2)}× · 工具 ${TOOLS.find(t => t[0] === tool)[1]} · 笔刷 ${size} · 层级 ${level} · 撤销 ${st.undo.length}`;
     if (hover) { const tx = hover[0] / T, ty = hover[1] / T, i = sc(hover[1]) * st.gw + sc(hover[0]); if (i >= 0 && i < ground8.length && tx >= 0 && tx < M.meta.w) { const nm = Core.CLASS_NAMES[ground8[i]]; s += ` · (${tx.toFixed(1)}, ${ty.toFixed(1)}) ${E.CLASS_ZH[nm] || nm} 层级 ${terr8[i * 4] - 1}${terr8[i * 4 + 1] ? ' 坡道' : ''}`; } }
     s += saved ? ' · 已保存' : ' · ●未保存'; if (n) s = n + '　|　' + s; if (el.textContent !== s) el.textContent = s; }
+
+  // ---------- v7.9 管理员发布（本地 admin 服务 / GitHub） ----------
+  const ADM_LS = 'nuc-campus-admin-local-v1';
+  function admLog(t) { const el = $('admLog'); if (!el) return; el.textContent = (el.textContent ? el.textContent + '\n' : '') + t; el.scrollTop = el.scrollHeight; }
+  function loadLocalAdm() {
+    try { return JSON.parse(localStorage.getItem(ADM_LS) || '{}') || {}; } catch (e) { return {}; }
+  }
+  function saveLocalAdm(o) { localStorage.setItem(ADM_LS, JSON.stringify(o || {})); }
+  function adminBase() {
+    const o = loadLocalAdm();
+    if (o.base) return o.base.replace(/\/$/, '');
+    // 默认：若当前就是 admin 服务则用 location.origin，否则 127.0.0.1:8790
+    if (location.port === '8790' || /admin-ping/.test(location.search)) return location.origin;
+    return 'http://127.0.0.1:8790';
+  }
+  function refreshAdminButtons() {
+    const loc = !!loadLocalAdm().token;
+    const gh = !!(window.AdminGitHub && AdminGitHub.loadConfig());
+    const show = loc || gh || location.port === '8790';
+    for (const id of ['pubLocal', 'pubGh']) { const b = $(id); if (!b) continue; b.hidden = !show; }
+    if ($('pubLocal')) $('pubLocal').hidden = !loc && location.port !== '8790';
+    if ($('pubGh')) $('pubGh').hidden = !gh;
+  }
+  async function pingAdmin() {
+    const base = ($('admBase') && $('admBase').value.trim()) || adminBase();
+    const rEl = $('admPingR'); if (rEl) rEl.textContent = '检测中…';
+    try {
+      const r = await fetch(base + '/api/admin-ping', { cache: 'no-store' });
+      const j = await r.json();
+      if (rEl) rEl.textContent = j.ok ? '✔ 已连通 ' + (j.bind || base) : '未识别的响应';
+      return j.ok;
+    } catch (e) {
+      if (rEl) rEl.textContent = '✘ 连不上（请先在本机运行 npm run admin）';
+      return false;
+    }
+  }
+  function openAdmin() {
+    const box = $('admin'); if (!box) return;
+    const loc = loadLocalAdm(), gh = window.AdminGitHub && AdminGitHub.loadConfig();
+    if ($('admToken')) $('admToken').value = loc.token || '';
+    if ($('admBase')) $('admBase').value = loc.base || '';
+    if ($('ghRepo')) $('ghRepo').value = gh ? (gh.owner + '/' + gh.repo) : '';
+    if ($('ghBranch')) $('ghBranch').value = gh ? gh.branch : 'main';
+    if ($('ghPrefix')) $('ghPrefix').value = gh ? (gh.pathPrefix || '') : '';
+    if ($('ghToken')) $('ghToken').value = gh ? gh.token : '';
+    if ($('admLog')) $('admLog').textContent = '';
+    box.hidden = false; box.classList.add('on');
+  }
+  function closeAdmin() { const box = $('admin'); if (box) { box.hidden = true; box.classList.remove('on'); } }
+  function saveAdminCfg() {
+    const token = ($('admToken').value || '').trim();
+    const base = ($('admBase').value || '').trim();
+    saveLocalAdm({ token: token || undefined, base: base || undefined });
+    const repo = ($('ghRepo').value || '').trim();
+    const branch = ($('ghBranch').value || 'main').trim() || 'main';
+    const prefix = ($('ghPrefix').value || '').trim();
+    const ght = ($('ghToken').value || '').trim();
+    if (repo && ght && window.AdminGitHub) {
+      const parts = repo.split('/');
+      if (parts.length !== 2) { note('仓库格式应为 owner/name', 4000); return; }
+      AdminGitHub.saveConfig(localStorage, { owner: parts[0], repo: parts[1], branch, token: ght, pathPrefix: prefix });
+      admLog('已保存 GitHub 设置（令牌仅存本机浏览器）');
+    } else if (window.AdminGitHub && !ght && !repo) {
+      /* keep existing or none */
+    } else if (repo && !ght) {
+      admLog('已填仓库但未填 PAT：未改写 GitHub 设置');
+    }
+    refreshAdminButtons();
+    note('✔ 管理员设置已保存', 2500);
+  }
+  function clearAdminCfg() {
+    if (!confirm('清除本浏览器中的本地令牌与 GitHub PAT，并隐藏发布按钮？')) return;
+    saveLocalAdm({});
+    if (window.AdminGitHub) AdminGitHub.clearConfig(localStorage);
+    if ($('admToken')) $('admToken').value = '';
+    if ($('ghToken')) $('ghToken').value = '';
+    refreshAdminButtons();
+    admLog('已退出管理员');
+    note('已清除管理员凭据', 2500);
+  }
+  async function encodeNowFiles() {
+    if (!window.AdminFiles) throw new Error('缺少 admin_files.js');
+    return AdminFiles.buildPublishFiles(M, ground8, terr8);
+  }
+  async function publishLocal() {
+    const loc = loadLocalAdm();
+    const token = loc.token || '';
+    if (!token && location.port !== '8790') { openAdmin(); note('请先在管理员设置里粘贴本地令牌', 4000); return; }
+    const v = runValidate();
+    if (v.errors.length && !confirm(`检查有 ${v.errors.length} 个错误。仍要发布到本机项目吗？`)) return;
+    note('☁ 正在发布到本机 game/data…', 6000);
+    try {
+      const exp = await encodeNow();
+      const base = adminBase();
+      const r = await fetch(base + '/api/publish-map', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Token': token || loc.token || '' },
+        body: JSON.stringify({ export: typeof exp === 'string' ? JSON.parse(exp) : exp, allowErrors: true }),
+      });
+      const j = await r.json();
+      if (!r.ok || !j.ok) throw new Error((j && j.error) || ('HTTP ' + r.status));
+      note(`✔ 已发布到本机（备份 ${j.stamp}）· ${j.written.map(w => w.name).join(', ')}`, 8000);
+      saved = true;
+    } catch (e) {
+      note('发布失败：' + e.message + '（确认 npm run admin 在跑，且令牌正确）', 9000);
+    }
+  }
+  async function publishGitHub() {
+    const cfg = window.AdminGitHub && AdminGitHub.loadConfig();
+    if (!cfg) { openAdmin(); note('请先配置 GitHub 仓库与 PAT', 4000); return; }
+    const v = runValidate();
+    if (v.errors.length && !confirm(`检查有 ${v.errors.length} 个错误。仍要提交到 GitHub 吗？`)) return;
+    note('🐙 正在编码并提交到 GitHub…', 8000);
+    try {
+      const files = await encodeNowFiles();
+      const res = await AdminGitHub.publishFiles(cfg, files, {
+        message: 'chore(map): 编辑器发布 ' + new Date().toISOString(),
+        onProgress: t => note('🐙 ' + t, 8000),
+      });
+      note('✔ 已提交 ' + res.sha.slice(0, 7) + ' · ' + res.url, 12000);
+      saved = true;
+      if (confirm('提交成功。是否打开 commit 页面？\n' + res.url)) location.href = res.url;
+    } catch (e) {
+      note('GitHub 发布失败：' + e.message, 10000);
+    }
+  }
+  function adminInit() {
+    if ($('adminCfg')) $('adminCfg').onclick = openAdmin;
+    if ($('admClose')) $('admClose').onclick = closeAdmin;
+    if ($('admSave')) $('admSave').onclick = saveAdminCfg;
+    if ($('admClear')) $('admClear').onclick = clearAdminCfg;
+    if ($('admPing')) $('admPing').onclick = () => pingAdmin();
+    if ($('pubLocal')) $('pubLocal').onclick = publishLocal;
+    if ($('pubGh')) $('pubGh').onclick = publishGitHub;
+    // 自动探测本地 admin
+    const tryBase = location.port === '8790' ? location.origin : 'http://127.0.0.1:8790';
+    fetch(tryBase + '/api/admin-ping', { cache: 'no-store' }).then(r => r.json()).then(j => {
+      if (j && j.ok) {
+        const loc = loadLocalAdm();
+        if (!loc.base) saveLocalAdm(Object.assign({}, loc, { base: tryBase }));
+        // 若在 admin 服务上打开且无令牌，提示去设置
+        refreshAdminButtons();
+        if (location.port === '8790' && !loadLocalAdm().token) note('检测到本地管理员服务：请点「⚙ 管理员」粘贴终端里的令牌', 7000);
+      } else refreshAdminButtons();
+    }).catch(() => refreshAdminButtons());
+    refreshAdminButtons();
+    // 暴露给测试
+    window.__edAdmin = { pingAdmin, publishLocal, publishGitHub, refreshAdminButtons, adminBase, loadLocalAdm, saveLocalAdm };
+  }
+
+
   load().catch(e => { $('loading').textContent = '读取地图失败：' + e.message + '（请用本地服务器打开，见 README）'; console.error(e); });
 })();

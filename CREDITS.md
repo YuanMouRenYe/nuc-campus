@@ -27,3 +27,7 @@ v2 adds no new third-party assets. v3 adds only the CC0 audio listed above.
 
 ## v7.8
 - UX 灵感（沉浸 / 拍照 / 备份 / 关于 / 地标传送 / 门口名牌 / 竖屏紧凑）参考同事 EXIST-D 的 PixelCampus（https://github.com/EXIST-D/PixelCampus）。该项目 LICENSE 为保留所有权利；本版本全部从零重写，**未复制其代码或美术**。详见 docs/LEARNED_FROM_PIXELCAMPUS.md。
+
+## v7.9
+- 手机 / 平板触控适配（情境按钮、底部抽屉、安全区、拍照分享）。无新外部素材。
+- 管理员本地发布服务与 GitHub 提交逻辑为本项目代码；不捆绑任何令牌。

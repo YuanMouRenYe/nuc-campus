@@ -1,6 +1,6 @@
 # 制作说明(HOW IT WAS MADE)
 
-本文说明 v7.8 的数据来源、地图生成管线、渲染方式、NPC 作息、介绍文本与测试方法。内容以仓库中的代码与 `docs/CHANGELOG_full_en.md`(原英文 README,含每个版本的详细改动)为准。
+本文说明 v7.9 的数据来源、地图生成管线、渲染方式、NPC 作息、介绍文本与测试方法。内容以仓库中的代码与 `docs/CHANGELOG_full_en.md`(原英文 README,含每个版本的详细改动)为准。
 
 ## 1. 数据来源
 
@@ -76,7 +76,7 @@ game/data/map.json     建筑(楼层、屋顶样式、门、室内)、道具、�
 
 - `npm test`(根目录)或 `cd game && npm test`,使用 Node 内置 `node:test`,无依赖。
 - 覆盖:地图栅格与元数据一致、关键建筑存在、出生点可走且所有可进入的门可步行到达(洪水填充)、建筑阻挡而道路不阻挡、室内网格合法、楼梯连通、作息与任务、存档往返、路灯间距、地形台地与坡道、道路宽度、淡出、v7.6.4 的升旗 / 食堂 / 介绍覆盖率 / NPC 分布等。
-- 当前:150 个测试,146 通过,0 失败,4 跳过(v7.3 南侧大台阶在 v7.6.4 中被移除,相应用例跳过)。
+- 当前:166 个测试,162 通过,0 失败,4 跳过(v7.3 南侧大台阶在 v7.6.4 中被移除,相应用例跳过)。
 - v7.7 新增 `tests/v77.test.cjs`:编辑器画笔 / 撤销重做、拉直台阶、碰撞开关、移动建筑、检查、导出导入往返、本地覆盖;电单车停车点与可骑行地面;二龙山成就;摇杆;离线(无外部 URL)。
 - 浏览器端到端:`tools/e2e_v77.js`(骑车、还车、成就提示、手机竖屏 / 横屏摇杆、点按查看)和 `tools/e2e_editor.js`(编辑器、拉直台阶、保存后游戏读取、重置),用 playwright-core + 本机 Chrome。
 - `game/tests/npcsim.cjs` 是 NPC 分布的模拟辅助脚本。
@@ -107,6 +107,7 @@ game/data/map.json     建筑(楼层、屋顶样式、门、室内)、道具、�
 | v7.6.4 | 北区与北门立面、东侧补充、七道门通道、停车场、四季柳树、早晨训练与升旗、NPC 分布、四个食堂室内、137 处悬停介绍 |
 | v7.7 | 地图编辑器、二龙山成就、共享电单车、手机触屏操作 |
 | v7.8 | 沉浸/拍照/备份/地标传送/门口名牌（灵感自 PixelCampus，从零重写） |
+| v7.9 | 手机/平板触控大修（情境按钮、底部抽屉、安全区、DPR） |
 
 ## 9. 已知未核实事项
 
@@ -147,3 +148,15 @@ game/data/map.json     建筑(楼层、屋顶样式、门、室内)、道具、�
 ## 11. v7.8 与 PixelCampus
 
 见 [`docs/LEARNED_FROM_PIXELCAMPUS.md`](LEARNED_FROM_PIXELCAMPUS.md)。PixelCampus LICENSE 为保留所有权利；v7.8 只采纳 UX 想法并全部从零实现（`js/v78core.js` / `js/v78.js`），测试 `tests/v78.test.cjs`，浏览器 e2e `tools/e2e_v78.js`。
+
+## 12. v7.9 手机适配
+
+见 [`docs/MOBILE_AUDIT.md`](MOBILE_AUDIT.md)。核心代码 `game/js/v79core.js` / `game/js/v79.js`，样式在 `style.css` 的 v7.9 段；测试 `tests/v79.test.cjs`，e2e `tools/e2e_v79_mobile.js`。
+
+### 管理员发布
+
+`tools/admin_server.cjs`（仅 127.0.0.1）+ 编辑器「发布到项目」；GitHub 路径见 `js/admin_github.js` 与 `docs/ADMIN_PUBLISH.md`。测试 `tests/v79_admin.test.cjs`、`tools/e2e_admin_publish.js`。
+
+### v7.9.1 操作模式
+
+`game/js/input_mode.js` 统一触屏探测与用户覆盖；菜单「操作模式」；桌面 e2e `tools/e2e_v791_desktop.js`。详见 `docs/MOBILE_AUDIT.md`。

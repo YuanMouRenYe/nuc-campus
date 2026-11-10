@@ -6,6 +6,7 @@
   const cv = document.getElementById('view'), ctx = cv.getContext('2d');
   const $ = id => document.getElementById(id);
   const SAVE_KEY = 'nuc-campus-save-v1';
+  if (window.InputMode) try { InputMode.init({ search: location.search }); } catch (e) { }
   const S = { quests: Core.questsNew(), toast: null, showQuests: true, muted: false, action: null, dish: null, goalKey: '', lastBell: 0, zoom: Core.ZOOMS.includes(+Q.get('zoom')) ? +Q.get('zoom') : 2, minutes: +(Q.get('t') || 8 * 60), keys: new Set(), fade: 0, fadeDir: 0, fadeCb: null, mode: 'out', interior: null, hint: null, dialog: null, showMap: false, frame: 0 };
   const DEHUAI_LAMPS = { rect: [218, 449, 268, 480], at: [[5, 460.8], [12.5, 466.3], [12.5, 475.3], [7.5, 475.3]] }; // [|dx| from statue axis, y]; mirrored pairs
   let STAIRS = null, terr8 = null, M, ground, ground8, wallPcs = [], shadow = null, elev8 = null, fencePcs = [], portals = [], col, buildings, sheet, sheetMeta, treeGrid, lamps = [], doorList = [], npcs = [], statics = [], minimap, mapBig;
@@ -175,6 +176,7 @@
     window.__game = { col: () => col, ground8: () => ground8, pinch: () => pinch, S, player, cam, M, npcs, lamps, buildings, ready: true, prewarm, teleport, enterInterior, exitInterior, save, toast, setZoom, interact, drawFrame: () => frame(performance.now(), true), step: dt => { update(dt); } };
     if (window.V77) V77.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot });
     if (window.V78) V78.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot, teleport, drawFrame: () => frame(performance.now(), true) });
+    if (window.V79) V79.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot, teleport, drawFrame: () => frame(performance.now(), true) });
     if (S.mapOverride) toast('🗺 已载入地图编辑器的本地修改（编辑器里可「重置」；URL 加 ?pristine 临时查看原图）', 4000);
     requestAnimationFrame(loop);
   }
@@ -255,7 +257,13 @@
     return c;
   }
   addEventListener('orientationchange', () => setTimeout(resize, 120)); if (window.visualViewport) visualViewport.addEventListener('resize', () => resize());
-  function resize() { const dpr = window.devicePixelRatio || 1; cv.width = Math.floor(innerWidth * dpr); cv.height = Math.floor(innerHeight * dpr); cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; S.dpr = dpr; }
+  function resize() {
+    const vv = window.visualViewport; const cssW = vv ? vv.width : innerWidth, cssH = vv ? vv.height : innerHeight;
+    const coarse = window.InputMode ? InputMode.effectiveTouch() : !!(matchMedia('(pointer: coarse)').matches || /touch=1/.test(location.search) || document.body.classList.contains('touch'));
+    const dpr = (window.V79Core ? V79Core.capDpr(window.devicePixelRatio || 1, coarse) : Math.min(window.devicePixelRatio || 1, coarse ? 2 : 4));
+    cv.width = Math.max(1, Math.floor(cssW * dpr)); cv.height = Math.max(1, Math.floor(cssH * dpr));
+    cv.style.width = cssW + 'px'; cv.style.height = cssH + 'px'; S.dpr = dpr;
+  }
   function scale() { return (S.mode === 'in' ? Math.max(1, S.zoom - 1) : S.zoom) * S.dpr; }
   function viewRect() { const s = scale(), w = cv.width / s, h = cv.height / s; return [cam.x - w / 2, cam.y - h / 2, cam.x + w / 2, cam.y + h / 2]; }
   function prewarm() { if (S.mode !== 'out') return; clampCam(); const [x0, y0, x1, y1] = viewRect(), s = scale();
@@ -354,6 +362,8 @@
   window.__hoverAt = hoverAt;
   cv.addEventListener('mousemove', e => {
     const el = $('tip'); if (!el) return; const TT = window.NUC_TIPS;
+    // 触屏壳下仅混合模式（外接鼠标）或强制电脑模式显示悬停介绍
+    if (window.InputMode && InputMode.effectiveTouch() && !InputMode.hybrid()) { el.classList.remove('on'); return; }
     if (S.mode !== 'out' || S.showMap || !TT) { el.classList.remove('on'); return; }
     const r = cv.getBoundingClientRect(), s = scale(), px = (e.clientX - r.left) * cv.width / r.width, py = (e.clientY - r.top) * cv.height / r.height;
     const ox = Math.round(cv.width / 2 - cam.x * s), oy = Math.round(cv.height / 2 - cam.y * s);
@@ -386,7 +396,7 @@
   cv.addEventListener('touchcancel', () => { touch = null; pinch = null; });
 
   { // on-screen E button for touch screens (also forced with ?touch=1)
-    const eb = $('ebtn'); if (eb) { if (Q.get('touch') || matchMedia('(pointer: coarse)').matches) eb.style.display = 'flex';
+    const eb = $('ebtn'); if (eb) { if (window.InputMode ? InputMode.effectiveTouch() : (Q.get('touch') || matchMedia('(pointer: coarse)').matches)) eb.style.display = 'flex';
       const go = e => { e.preventDefault(); e.stopPropagation(); interact(); }; eb.addEventListener('touchstart', go, { passive: false }); eb.addEventListener('mousedown', go); }
   }
   function interact() {
@@ -468,6 +478,7 @@
   // ---------- update ----------
   const FLAGC = [];
   function update(dt) {
+    if (window.V79 && V79.paused && V79.paused()) return;
     S.minutes += dt / 0.7; // one game minute every 0.7 s
     { // class bells
       const bells = Core.bellsBetween(S.lastBell, S.minutes, ({ summer: 'summer', winter: 'winter' })[Q.get('bells')] || Core.bellSchedule(new Date().getMonth() + 1, new Date().getDate())); S.lastBell = S.minutes;
@@ -486,8 +497,8 @@
     let ix = 0, iy = 0; const K = S.keys;
     if (K.has('a') || K.has('arrowleft')) ix -= 1; if (K.has('d') || K.has('arrowright')) ix += 1;
     if (K.has('w') || K.has('arrowup')) iy -= 1; if (K.has('s') || K.has('arrowdown')) iy += 1;
-    if (touch && Math.hypot(touch.dx, touch.dy) > 12) { ix = touch.dx; iy = touch.dy; }
-    { const js = window.V77 && V77.stick(); if (js) { ix = js.x; iy = js.y; } } // v7.7 虚拟摇杆
+    if (touch && Math.hypot(touch.dx, touch.dy) > 12 && !(window.V78 && V78.frozen && V78.frozen())) { ix = touch.dx; iy = touch.dy; }
+    { const js = window.V77 && V77.stick(); if (js && !(window.V78 && V78.frozen && V78.frozen())) { ix = js.x; iy = js.y; } } // v7.7 虚拟摇杆；拍照时不走摇杆
     const L = Math.hypot(ix, iy); const grid = S.mode === 'out' ? col : S.interior.col;
     player.wantMove = L > 0;
     player.moving = L > 0 && !S.dialog && !S.quiz && S.fadeDir === 0 && !S.showMap && !(window.V78 && V78.frozen());
@@ -565,6 +576,7 @@
     else { const U = S.mode === 'out' ? T : IT, tx = player.x * U, ty = player.y * U - 10, k = 1 - Math.exp(-dt * 9);
       cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; clampCam(); }
     if (window.V78) V78.tick();
+    if (window.V79) V79.tick();
   }
 
   function surfaceAt() {

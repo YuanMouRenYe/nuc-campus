@@ -78,3 +78,13 @@ URL 参数:`?pristine` 忽略本地修改、打开原图;`?at=x,y,z` 打开时�
 - 编辑器只改地表、层级、碰撞、建筑、门和树;路灯由游戏按路网自动布置(`Core.placeLamps`),不能单独拖动。
 - 高程图 `elev.png` 不在编辑范围内(只用于远景着色)。
 - 新增建筑请用 V 选中已有建筑调整;编辑器不提供"新建建筑"(需要名字、楼层、室内等元数据)。
+
+
+## 管理员一键发布（v7.9）
+
+除了导出后再跑脚本，管理员可用「发布到项目」（本地 ）或「发布到 GitHub」（fine-grained PAT）。详见 [](ADMIN_PUBLISH.md)。
+
+
+## 管理员一键发布（v7.9）
+
+除了导出后再跑脚本，管理员可用「发布到项目」（本地 npm run admin）或「发布到 GitHub」（fine-grained PAT）。详见 docs/ADMIN_PUBLISH.md。

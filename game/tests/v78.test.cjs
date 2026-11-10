@@ -35,7 +35,7 @@ test('nearDoor picks the closest named door within radius', () => {
 test('photo filename and about metadata', () => {
   const n = VC.photoFilename(new Date('2026-11-06T12:34:56+08:00'));
   assert.match(n, /^nuc-campus-\d{8}-\d{6}\.png$/);
-  assert.strictEqual(VC.ABOUT.version, '7.8');
+  assert.strictEqual(VC.ABOUT.version, '7.9.1');
   assert.strictEqual(VC.ABOUT.license, 'MIT');
   assert.ok(VC.WATERMARK.includes('中北大学'));
 });
