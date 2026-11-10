@@ -10,14 +10,18 @@
 </head>
 <body>
 <canvas id="view"></canvas>
-<div id="topleft" class="panel"><div id="clock">第 1 天 08:00</div><div id="area">中北大学</div></div>
-<div id="quests" class="panel"><div class="qt">今日任务 <span class="small">（Q 收起）</span></div><div id="qlist"></div></div>
-<div id="toast" class="panel"></div>
+<div id="hud-left">
+  <div id="topleft" class="panel"><div id="clock">第 1 天 08:00</div><div id="area">中北大学</div></div>
+  <div id="quests" class="panel"><div class="qt">今日任务 <span class="small">（Q 收起）</span></div><div id="qlist"></div></div>
+  <div id="toast" class="panel"></div>
+</div>
+<div id="hud-right">
+  <div id="mmwrap" class="panel"><canvas id="minimap"></canvas></div>
+</div>
 <div id="quiz" class="panel"></div>
 <button id="mute" class="panel" aria-label="静音" title="V 静音/开声">🔊</button>
 <div id="tip"></div>
 <div id="intro" class="panel"><div class="it"></div><div class="is"></div><div class="ib"></div></div>
-<div id="mmwrap" class="panel"><canvas id="minimap"></canvas></div>
 <div id="hint" class="panel"></div>
 <button id="ebtn" class="panel" aria-label="互动"><b>E</b><span id="ebtnlab"></span></button>
 <div id="help" class="panel small">WASD/方向键 移动 · Shift 跑 · E 互动/进门 · M 地图 · Q 任务 · +/- 缩放(0.25×–4×) · V 声音 · J 季节 · T 天气 · N 快进1小时 · B 骑车/还车 · K 成就 · Z 沉浸 · P 拍照 · Y 地标传送 · Tab 菜单 · 手机请用右下主按钮与 ☰</div>

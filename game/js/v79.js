@@ -316,8 +316,8 @@
       addEventListener('resize', () => layoutClass());
       addEventListener('orientationchange', () => setTimeout(layoutClass, 150));
       if (window.visualViewport) visualViewport.addEventListener('resize', () => layoutClass());
-      // quests collapsed by default on phone
-      if (document.body.classList.contains('phone') && A.S) A.S.showQuests = false;
+      // quests collapsed by default on phone（v7.9.3：要真的重绘，否则面板还是展开的）
+      if (document.body.classList.contains('phone') && A.S && A.S.showQuests && A.toggleQuests) A.toggleQuests();
       if (window.InputMode) InputMode.onChange(() => { layoutClass(); updateFab(); });
       window.__v79 = {
         classify: C.classify, actionLabel: C.actionLabel, openSheet, closeSheets, openLandmarks, openAbout, cycleInputMode, setInputMode: m => { if (window.InputMode) { InputMode.setMode(m); layoutClass(); updateFab(); } },

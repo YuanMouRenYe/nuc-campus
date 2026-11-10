@@ -271,3 +271,15 @@ body.tablet #menu, body.tablet #achpanel, body.tablet #tp, body.tablet #about {
 /* v7.9.1 操作模式 / 混合键鼠 */
 body.hybrid #tip { display: block !important; }
 body:not(.touch) #fab, body:not(.touch) #joy { display: none !important; }
+
+/* v7.9.3 角落堆叠：左上（时钟 / 任务 / 提示 / 成就）和右上（小地图）各排一列，
+   面板按文档流往下排，不再靠手写 top/left 猜位置，任何设备都不会互相压 */
+#hud-left, #hud-right { position: fixed; display: flex; flex-direction: column; gap: 8px; z-index: 30; pointer-events: none; }
+#hud-left { left: calc(10px + env(safe-area-inset-left)); top: calc(10px + env(safe-area-inset-top)); align-items: flex-start; max-width: min(320px, 64vw); }
+#hud-right { right: calc(10px + env(safe-area-inset-right)); top: calc(10px + env(safe-area-inset-top)); align-items: flex-end; }
+#hud-left > *, #hud-right > * { position: static !important; inset: auto !important; transform: none !important; margin: 0 !important; pointer-events: auto; }
+#hud-left #toast { white-space: normal; max-width: 100%; text-align: left; }
+#hud-left #achtoast { display: none; max-width: 100%; }
+#hud-left #achtoast.on { display: flex; animation: hudIn .22s steps(3); }
+@keyframes hudIn { from { opacity: 0 } to { opacity: 1 } }
+@media (max-height: 500px) { #hud-left #quests { max-height: 26vh; overflow: auto; } }

@@ -48,7 +48,8 @@
   function el(tag, id, cls, html, parent) { const e = document.createElement(tag); if (id) e.id = id; if (cls) e.className = cls; if (html != null) e.innerHTML = html; (parent || document.body).appendChild(e); return e; }
   const isTouch = () => window.InputMode ? InputMode.effectiveTouch() : !!(Q.get('touch') || matchMedia('(pointer: coarse)').matches);
   function buildUI() {
-    el('div', 'achtoast', 'panel', '<div class="ai"></div><div class="ab"><div class="ah">成就达成！</div><div class="an"></div><div class="ad"></div></div>');
+    // v7.9.3：成就卡挂到左上角堆叠里，跟时钟/任务/提示同一列，不会互相压
+    el('div', 'achtoast', 'panel', '<div class="ai"></div><div class="ab"><div class="ah">成就达成！</div><div class="an"></div><div class="ad"></div></div>', document.getElementById('hud-left'));
     el('div', 'achpanel', 'panel', '');
     const menu = el('div', 'menu', 'panel', '');
     const items = [['🗺', '校园地图', 'M', () => { A.S.showMap = !A.S.showMap; }], ['📋', '今日任务', 'Q', () => A.toggleQuests()], ['🏅', '成就', 'K', () => togglePanel()], ['🛵', '骑车 / 还车', 'B', () => toggleRide()],

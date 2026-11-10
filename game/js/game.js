@@ -587,8 +587,8 @@
     // camera（v7.8 拍照模式：相机自由平移，不跟玩家）
     if (window.V78 && V78.frozen()) { const c = V78.photoCam(dt, S.keys, cam); if (c) { cam.x = c.x; cam.y = c.y; } clampCam(); }
     else { const U = S.mode === 'out' ? T : IT, tx = player.x * U;
-      // v7.9.2 视线前置：户外把人物放到屏幕偏下，多看到前方的路（室内不动）
-      const look = S.mode === 'out' ? Math.min(60, cv.height / scale() * 0.07) : 0, ty = player.y * U - 10 - look, k = 1 - Math.exp(-dt * 9);
+      // v7.9.3 视线前置：户外把人物放到屏幕偏下（约 60%），上方多留出看路的空间（室内不动）
+      const look = S.mode === 'out' ? Math.min(90, cv.height / scale() * 0.11) : 0, ty = player.y * U - 10 - look, k = 1 - Math.exp(-dt * 9);
       cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; clampCam(); }
     if (window.V78) V78.tick();
     if (window.V79) V79.tick();
