@@ -7,7 +7,20 @@
   const $ = id => document.getElementById(id);
   const SAVE_KEY = 'nuc-campus-save-v1';
   if (window.InputMode) try { InputMode.init({ search: location.search }); } catch (e) { }
-  const S = { quests: Core.questsNew(), toast: null, showQuests: true, muted: false, action: null, dish: null, goalKey: '', lastBell: 0, zoom: Core.ZOOMS.includes(+Q.get('zoom')) ? +Q.get('zoom') : 2, minutes: +(Q.get('t') || 8 * 60), keys: new Set(), fade: 0, fadeDir: 0, fadeCb: null, mode: 'out', interior: null, hint: null, dialog: null, showMap: false, frame: 0 };
+  // v7.9.2 手机自适应缩放：手机（含横屏）默认 1×（390 宽 2× 只看得到 12 格，人物被放大到占屏宽 16%），
+  // 桌面和平板仍是 2×。玩家自己捏合/按键调过之后，用 localStorage 记下的值。
+  const ZOOM_KEY = 'nuc-campus-zoom-pref';
+  const isPhoneNow = () => {
+    try { if (window.InputMode) return String(InputMode.snapshot().kind).indexOf('phone') === 0; } catch (e) { }
+    return matchMedia('(pointer: coarse)').matches && Math.min(innerWidth, innerHeight) <= 520;
+  };
+  const autoZoom = () => isPhoneNow() ? 1 : 2;
+  function initialZoom() {
+    if (Q.has('zoom')) { const q = +Q.get('zoom'); if (Core.ZOOMS.includes(q)) return q; }
+    const z = +(localStorage.getItem(ZOOM_KEY) || 0); if (Core.ZOOMS.includes(z)) return z;
+    return autoZoom();
+  }
+  const S = { quests: Core.questsNew(), toast: null, showQuests: true, muted: false, action: null, dish: null, goalKey: '', lastBell: 0, zoom: initialZoom(), minutes: +(Q.get('t') || 8 * 60), keys: new Set(), fade: 0, fadeDir: 0, fadeCb: null, mode: 'out', interior: null, hint: null, dialog: null, showMap: false, frame: 0 };
   const DEHUAI_LAMPS = { rect: [218, 449, 268, 480], at: [[5, 460.8], [12.5, 466.3], [12.5, 475.3], [7.5, 475.3]] }; // [|dx| from statue axis, y]; mirrored pairs
   let STAIRS = null, terr8 = null, M, ground, ground8, wallPcs = [], shadow = null, elev8 = null, fencePcs = [], portals = [], col, buildings, sheet, sheetMeta, treeGrid, lamps = [], doorList = [], npcs = [], statics = [], minimap, mapBig;
   const player = { x: 0, y: 0, dir: 0, frame: 0, anim: 0, moving: false, variant: 0 };
@@ -150,7 +163,7 @@
     if (Q.has('reset')) try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
     let saved = null; if (!['x', 'y', 't', 'interior', 'nosave'].some(k => Q.has(k))) try { saved = Core.saveParse(localStorage.getItem(SAVE_KEY), M.meta); } catch (e) { }
     player.x = +(Q.get('x') || M.spawn[0]); player.y = +(Q.get('y') || M.spawn[1]); player.dir = 1;
-    if (saved) { player.x = saved.x; player.y = saved.y; S.minutes = saved.minutes; if (!Q.has('zoom')) S.zoom = saved.zoom; S.quests = saved.quests; S.muted = saved.muted; S.loadedSave = true; }
+    if (saved) { player.x = saved.x; player.y = saved.y; S.minutes = saved.minutes; if (!Q.has('zoom') && localStorage.getItem(ZOOM_KEY)) S.zoom = saved.zoom; S.quests = saved.quests; S.muted = saved.muted; S.loadedSave = true; } // v7.9.2: 存档里的缩放只在玩家自己捏合/按键设过之后才恢复
     if (Q.has('mute')) S.muted = true;
     // season: ?season= > saved choice (J) > real date (11月 = 秋, ginkgo gold); weather: ?weather= > saved choice (T) > daily roll
     S.seasonSet = Core.SEASONS.includes(Q.get('season')) ? Q.get('season') : saved && saved.season || null;
@@ -298,7 +311,7 @@
   addEventListener('keyup', e => S.keys.delete(e.key.toLowerCase()));
   addEventListener('pointerdown', () => Sound.unlock());
   addEventListener('wheel', e => { if (S.showMap) return; setZoom(Core.zoomStep(S.zoom, e.deltaY < 0 ? 1 : -1)); }, { passive: true });
-  function setZoom(z) { if (z === S.zoom) return; S.zoom = z; if (z < 1 && S.mode === 'out') toast(z === 0.25 ? '鸟瞰 0.25× —— 整个校园' : '缩小 0.5×', 1200); }
+  function setZoom(z) { if (z === S.zoom) return; S.zoom = z; try { localStorage.setItem(ZOOM_KEY, String(z)); } catch (e) {} if (z < 1 && S.mode === 'out') toast(z === 0.25 ? '鸟瞰 0.25× —— 整个校园' : '缩小 0.5×', 1200); }
   function toggleMute() { S.muted = !S.muted; Sound.setMuted(S.muted); $('mute').textContent = S.muted ? '🔇' : '🔊'; toast(S.muted ? '声音已关闭（V 打开）' : '声音已打开', 1200); save(); }
   $('mute').addEventListener('click', e => { e.stopPropagation(); Sound.unlock(); toggleMute(); });
   $('quests').addEventListener('click', toggleQuests);
@@ -573,7 +586,9 @@
     Sound.ambience(Core.nightness(S.minutes), S.mode === 'in', S.weather, S.season);
     // camera（v7.8 拍照模式：相机自由平移，不跟玩家）
     if (window.V78 && V78.frozen()) { const c = V78.photoCam(dt, S.keys, cam); if (c) { cam.x = c.x; cam.y = c.y; } clampCam(); }
-    else { const U = S.mode === 'out' ? T : IT, tx = player.x * U, ty = player.y * U - 10, k = 1 - Math.exp(-dt * 9);
+    else { const U = S.mode === 'out' ? T : IT, tx = player.x * U;
+      // v7.9.2 视线前置：户外把人物放到屏幕偏下，多看到前方的路（室内不动）
+      const look = S.mode === 'out' ? Math.min(60, cv.height / scale() * 0.07) : 0, ty = player.y * U - 10 - look, k = 1 - Math.exp(-dt * 9);
       cam.x += (tx - cam.x) * k; cam.y += (ty - cam.y) * k; clampCam(); }
     if (window.V78) V78.tick();
     if (window.V79) V79.tick();
@@ -840,7 +855,7 @@
     const placed = [];
     const free = (x, y, w, h) => { for (const r of placed) if (x < r[2] && x + w > r[0] && y < r[3] && y + h > r[1]) return false; placed.push([x, y, x + w, y + h]); return true; };
     if (S.zoom <= 2) for (const l of M.labels) if (l.k === 'sub') { const x = sx(l.x), y = sy(l.y); if (x > -200 && x < W + 200 && y > -50 && y < H + 50) { ctx.font = `${Math.round(fs * 1.25)}px ArkPixel`; const w = ctx.measureText(l.t).width + 8; if (free(x - w / 2, y - fs, w, fs * 2)) txt(l.t, x, y, Math.round(fs * 1.25), '#fff2b8', '#4a2a14'); } }
-    if (S.zoom <= 1) for (const l of M.labels) if (l.k === 'area') { const x = sx(l.x), y = sy(l.y); if (x > -200 && x < W + 200 && y > -50 && y < H + 50) txt(l.t, x, y, fs * 2, '#fff6dc', '#3b1f10'); }
+    if (S.zoom <= 1) for (const l of M.labels) if (l.k === 'area') { const x = sx(l.x), y = sy(l.y); if (x > -200 && x < W + 200 && y > -50 && y < H + 50) txt(l.t, x, y, fs * (isPhoneNow() ? 1.35 : 2), '#fff6dc', '#3b1f10'); } // v7.9.2：手机默认 1× 后区域名会一直出现，缩小一点免得压住摇杆
     for (const l of M.labels) {
       if (l.k === 'area' || l.k === 'sub') continue;
       if (l.k === 'road' && S.zoom < 2) continue;

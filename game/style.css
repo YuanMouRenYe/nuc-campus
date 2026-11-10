@@ -88,7 +88,7 @@ body.touch #hint { bottom: calc(176px + env(safe-area-inset-bottom)); max-width:
 body.touch #intro { bottom: calc(176px + env(safe-area-inset-bottom)); }
 
 @media (max-width: 700px) { #achtoast { min-width: 0; max-width: 78vw; } #achtoast .an { font-size: 16px; } #toast { white-space: normal; max-width: 86vw; text-align: center; } #mmwrap { padding: 3px; } }
-@media (max-height: 500px) { .panel { font-size: 14px; } #topleft { line-height: 18px; padding: 4px 10px; } #minimap { width: 120px; } #quests { top: 64px; max-width: 200px; max-height: 40vh; overflow: hidden; }
+@media (max-height: 500px) { .panel { font-size: 14px; } #topleft { line-height: 18px; padding: 4px 10px; } #minimap { width: 120px; } #quests { top: 64px; max-width: 200px; max-height: 40vh; overflow: hidden; } #quests .q .w { display: none; } /* v7.9.2 横屏矮屏不显示任务地点说明，别把画面吃掉 */
   body.touch #joy { width: 112px; height: 112px; bottom: 14px; } body.touch #joyknob { width: 46px; height: 46px; margin: -23px 0 0 -23px; }
   body.touch #ebtn { bottom: 76px; width: 64px; height: 64px; } body.touch #ridebtn { bottom: 18px; right: 96px; width: 56px; height: 56px; } body.touch #menubtn { bottom: 14px; }
   body.touch #mute { bottom: 150px; right: 26px; } body.touch #hint, body.touch #intro { bottom: 18px; max-width: 46vw; } #intro .ib { display: none; } #achtoast { top: 44px; } }
@@ -123,14 +123,15 @@ html, body { width: 100%; height: 100%; height: 100dvh; }
 body.touch .panel { font-size: 14px; }
 body.touch #clock { font-size: 14px; }
 body.touch #area { font-size: 12px; } /* 次要信息可略小 */
-body.touch #quests { font-size: 14px; max-width: min(220px, 56vw); top: calc(12px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); }
+body.touch #quests { font-size: 14px; max-width: min(220px, 56vw); top: calc(78px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); } /* v7.9.2：原来 top 12px 直接压在时钟面板上，任务标题被挡住 */
 body.touch #topleft { top: calc(10px + env(safe-area-inset-top)); left: calc(10px + env(safe-area-inset-left)); padding: 6px 10px; line-height: 20px; z-index: 25; }
 body.touch #mmwrap { top: calc(10px + env(safe-area-inset-top)); right: calc(10px + env(safe-area-inset-right)); padding: 4px; z-index: 25; }
 body.touch #minimap { width: 108px; }
 body.phone #minimap { width: 96px; }
 body.touch #toast { top: calc(12px + env(safe-area-inset-top)); z-index: 50; max-width: 92vw; white-space: normal; text-align: center; }
 body.touch #achtoast { top: calc(56px + env(safe-area-inset-top)); min-width: 0; width: min(340px, 92vw); }
-body.touch #achtoast:not(.on) { transform: translate(-50%, calc(-120% - env(safe-area-inset-top))); }
+/* v7.9.2：原来只上移 120%，正好在顶部露出一条（成就卡底部压住时钟面板），改成整张移出视口 */
+body.touch #achtoast:not(.on) { transform: translate(-50%, calc(-100% - 80px - env(safe-area-inset-top))); }
 
 /* 隐藏桌面帮助；手机用菜单说明 */
 body.touch #help { display: none !important; }

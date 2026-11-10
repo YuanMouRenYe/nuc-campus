@@ -140,9 +140,9 @@
       }
     }
     if (pref.immersive) document.body.classList.add('immersive');
-    // 窄屏竖屏紧凑
+    // 窄屏竖屏紧凑（v7.9.2：横屏矮屏也收，手机横过来 HUD 太占地方）
     const applyCompact = () => {
-      const c = matchMedia('(max-width: 480px) and (orientation: portrait)').matches;
+      const c = matchMedia('(max-width: 480px) and (orientation: portrait)').matches || matchMedia('(max-height: 480px)').matches;
       document.body.classList.toggle('compact', c);
     };
     applyCompact(); addEventListener('resize', applyCompact); addEventListener('orientationchange', applyCompact);
