@@ -28,9 +28,11 @@
     if (/[?&]touch=1\b/.test(q) || /[?&]touch\b/.test(q)) return true;
     if (typeof matchMedia === 'undefined') return false;
     try {
+      // v7.9.4：只认「主指针」。带触屏的笔记本 / 一体机也有 any-pointer: coarse，
+      // 但主指针是鼠标，那就不该算触屏，否则桌面端会冒出摇杆。
       if (matchMedia('(pointer: coarse)').matches) return true;
-      if (matchMedia('(any-pointer: coarse)').matches) return true;
-      if (matchMedia('(hover: none)').matches && !matchMedia('(pointer: fine)').matches) return true;
+      if (matchMedia('(pointer: fine)').matches) return false;
+      if (matchMedia('(hover: none)').matches) return true;
     } catch (e) { }
     return false;
   }
