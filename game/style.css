@@ -283,3 +283,88 @@ body:not(.touch) #fab, body:not(.touch) #joy { display: none !important; }
 #hud-left #achtoast.on { display: flex; animation: hudIn .22s steps(3); }
 @keyframes hudIn { from { opacity: 0 } to { opacity: 1 } }
 @media (max-height: 500px) { #hud-left #quests { max-height: 26vh; overflow: auto; } }
+
+/* v7.10 地标列表（新生导航）与大地图里的列表入口 */
+#bigmapnav { display: none; }
+body.touch #bigmapnav { display: block; margin-top: 8px; width: 100%; min-height: 48px; font: inherit; font-size: 15px;
+  color: #3b1f10; background: #ffe9a8; border: 3px solid #c58a45; cursor: pointer; touch-action: manipulation; }
+#tp .navgroup { font-size: 13px; color: #7a4320; margin: 12px 4px 4px; letter-spacing: .5px; }
+#tp .navbtn { display: flex; align-items: center; gap: 10px; text-align: left; }
+#tp .navbtn .navi { width: 30px; font-size: 22px; text-align: center; flex: 0 0 auto; }
+#tp .navbtn .navt { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+#tp .navbtn .navt b { font-weight: 400; font-size: 16px; }
+#tp .navbtn .navt i { font-style: normal; font-size: 11px; color: #8a6a4a; }
+
+/* ============================================================
+   v7.10 UI 皮肤：把「米黄 + 粗棕边 + 硬投影」的旧面板换成
+   深胡桃底 + 金线 + 内高光的新像素风；保留硬边、不用圆角过大。
+   ============================================================ */
+:root {
+  --ui-bg: rgba(38, 26, 18, .92);
+  --ui-bg-2: rgba(62, 42, 27, .95);
+  --ui-line: #f0c987;
+  --ui-line-dim: #9a723f;
+  --ui-text: #fdf2dc;
+  --ui-dim: #dcc09a;
+  --ui-accent: #ffd36b;
+  --ui-shadow: 0 5px 0 rgba(0, 0, 0, .30);
+  --ui-radius: 6px;
+}
+.panel {
+  background: var(--ui-bg);
+  color: var(--ui-text);
+  border: 2px solid var(--ui-line);
+  border-radius: var(--ui-radius);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10), var(--ui-shadow);
+}
+#area, #quests .qt, #tip .ts, .small, #tp .navbtn .navt i, #quests .q .w, #achtoast .ah, #achtoast .ad { color: var(--ui-dim); }
+#quests .qt { border-bottom-color: var(--ui-line-dim); }
+#achtoast .an, #intro .it { color: var(--ui-accent); }
+#toast { background: var(--ui-bg-2); color: var(--ui-text); }
+#hint, #help, #intro, #loading { background: var(--ui-bg); color: var(--ui-text); }
+#tip { background: var(--ui-bg-2); color: var(--ui-text); border-color: var(--ui-line); border-radius: var(--ui-radius); box-shadow: var(--ui-shadow); }
+#tip b { color: var(--ui-accent); }
+/* 按钮：同样的深底金线，按下有 1px 下沉 */
+#menu button, #achpanel .close, #tp button, #about .sheet-close, #bigmapnav, #achpanel .ar {
+  background: var(--ui-bg-2); color: var(--ui-text); border: 2px solid var(--ui-line-dim); border-radius: 5px;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+}
+#menu button:hover, #tp button:hover, #bigmapnav:hover, #achpanel .close:hover { border-color: var(--ui-line); background: #4a3220; }
+#menu button:active, #tp button:active, #bigmapnav:active, #achpanel .close:active { transform: translateY(1px); box-shadow: none; }
+body.touch .sheet-close { background: var(--ui-line) !important; color: #2a1a10 !important; border-color: #2a1a10 !important; }
+/* 小地图外框、顶栏字重 */
+#mmwrap { padding: 5px; }
+#mmwrap canvas { border-radius: 3px; display: block; }
+#topleft { line-height: 26px; }
+#clock { letter-spacing: .5px; }
+/* 大地图与遮罩 */
+#bigwrap { background: rgba(14, 9, 4, .62); }
+#bigwrap .title { color: var(--ui-text); }
+#bigmap { border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+#bigmapnav { margin-top: 8px; }
+/* 触屏圆钮（摇杆底、骑车、菜单、E）统一深底金线 */
+body.touch #joy { background: rgba(38, 26, 18, .30); border: 3px solid rgba(240, 201, 135, .85); box-shadow: inset 0 0 0 2px rgba(240, 201, 135, .28); }
+body.touch #joyknob, #joyknob { background: rgba(240, 201, 135, .75) !important; border-color: #fff2d0 !important; }
+
+/* v7.10 大地图底栏：手机上一定有关闭，列表入口放在同一行 */
+#bigwrap .bigrow { display: flex; gap: 8px; margin-top: 8px; align-items: stretch; }
+#mapclose { min-height: 44px; padding: 0 18px; font: inherit; font-size: 15px; color: var(--ui-text);
+  background: var(--ui-bg-2); border: 2px solid var(--ui-line-dim); border-radius: 5px; cursor: pointer; }
+#mapclose:hover { border-color: var(--ui-line); }
+body.touch #mapclose { min-height: 52px; flex: 0 0 auto; }
+body.touch #bigmapnav { flex: 1 1 auto; margin-top: 0; }
+
+/* v7.10 修正地标列表排版：文字列要占满剩余宽度，别被挤成一字一行 */
+#tp .navbtn { align-items: flex-start; }
+#tp .navbtn .navt { flex: 1 1 auto; min-width: 0; width: 100%; white-space: normal; }
+#tp .navbtn .navt b { display: block; font-size: 16px; }
+#tp .navbtn .navt i { display: block; margin-top: 2px; }
+body.touch #tp .mt, body.touch #menu .mt { color: var(--ui-accent); }
+
+/* v7.10 触屏主按钮（情境 FAB）跟随新皮肤：默认深底金线，可点时用金色高亮 */
+body.touch #fab { background: var(--ui-bg-2); color: var(--ui-text); border: 2px solid var(--ui-line-dim); box-shadow: var(--ui-shadow); }
+body.touch #fab.on { background: var(--ui-accent); color: #2a1a10; border-color: #2a1a10; }
+body.touch #fab.on b, body.touch #fab.on span { color: #2a1a10; }
+
+/* v7.10 新生欢迎卡出现时，先别叠「按 E 查看」的提示条 */
+#intro.on ~ #hint { display: none !important; }

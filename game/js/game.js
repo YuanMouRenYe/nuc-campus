@@ -160,8 +160,9 @@
     minimap = makeMinimap(1); mapBig = minimap;
     $('minimap').width = 504; $('minimap').height = 360;
     // saved game (skipped when the URL pins a spot/time, ?nosave, or wiped with ?reset)
-    if (Q.has('reset')) try { localStorage.removeItem(SAVE_KEY); } catch (e) { }
+    if (Q.has('reset')) try { localStorage.removeItem(SAVE_KEY); localStorage.removeItem('nuc-campus-onboard-v1'); } catch (e) { }
     let saved = null; if (!['x', 'y', 't', 'interior', 'nosave'].some(k => Q.has(k))) try { saved = Core.saveParse(localStorage.getItem(SAVE_KEY), M.meta); } catch (e) { }
+    // v7.10 出生点改到「一道门」写在 map.json 的 spawn 里（单一真源）；门内 486，首屏能看到校名石和铜像
     player.x = +(Q.get('x') || M.spawn[0]); player.y = +(Q.get('y') || M.spawn[1]); player.dir = 1;
     if (saved) { player.x = saved.x; player.y = saved.y; S.minutes = saved.minutes; if (!Q.has('zoom') && localStorage.getItem(ZOOM_KEY)) S.zoom = saved.zoom; S.quests = saved.quests; S.muted = saved.muted; S.loadedSave = true; } // v7.9.2: 存档里的缩放只在玩家自己捏合/按键设过之后才恢复
     if (Q.has('mute')) S.muted = true;
@@ -186,6 +187,10 @@
     renderQuests();
     if (!Q.has('nosave')) { setInterval(save, 5000); addEventListener('beforeunload', save); document.addEventListener('visibilitychange', () => { if (document.hidden) save(); }); }
     if (S.loadedSave) toast('已读取存档：' + Core.clockText(Math.floor(S.minutes)), 2500);
+    // v7.10 首次进入：从一道门进校，先给一张「你到学校了」的卡；标记单独存，老玩家不会被打断
+    const ONBOARD_KEY = 'nuc-campus-onboard-v1';
+    const firstRun = !saved && !Q.has('x') && !Q.has('interior') && !Q.has('nosave') && !localStorage.getItem(ONBOARD_KEY);
+    if (firstRun) { S.onboard = true; try { localStorage.setItem(ONBOARD_KEY, '1'); } catch (e) { } setTimeout(() => { S.onboard = false; }, 9000); setTimeout(() => toast('方向键 / 摇杆 走，Shift 跑 · 走到前面的彭德怀铜像看看', 6000), 2500); }
     window.__game = { col: () => col, ground8: () => ground8, pinch: () => pinch, S, player, cam, M, npcs, lamps, buildings, ready: true, prewarm, teleport, enterInterior, exitInterior, save, toast, setZoom, interact, drawFrame: () => frame(performance.now(), true), step: dt => { update(dt); } };
     if (window.V77) V77.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot });
     if (window.V78) V78.init({ M, S, player, npcs, ground8: () => ground8, col: () => col, toast, interact, save, setZoom, toggleQuests, toggleMute, cycleSeason, cycleWeather, statics, scale, cam, cv, freeSpot, teleport, drawFrame: () => frame(performance.now(), true) });
@@ -358,11 +363,19 @@
       inside: fromB ? { key: S.interior.key, from: fromB.id, x: player.x, y: player.y } : null })); } catch (e) { }
   }
   addEventListener('blur', () => S.keys.clear());
-  $('bigmap').addEventListener('click', e => { // click on full map to fast-travel
-    if (S.mode !== 'out') return; const r = $('bigmap').getBoundingClientRect();
+  // v7.10 手机上整张图缩到 350 px，一格不到半个像素，点哪儿都点不准 —— 触屏一律走「列表」，
+  // 桌面（鼠标精确）保留点图传送。误点不会把人乱传。
+  $('bigmap').addEventListener('click', e => {
+    if (S.mode !== 'out') return;
+    if (window.InputMode && InputMode.effectiveTouch()) {
+      if (!S.mapHinted) { S.mapHinted = true; toast('手机上看图容易点偏：点下面「找不到？用列表直接去」，一指就能选中', 4000); }
+      return;
+    }
+    const r = $('bigmap').getBoundingClientRect();
     const tx = (e.clientX - r.left) / r.width * M.meta.w, ty = (e.clientY - r.top) / r.height * M.meta.h;
     const spot = freeSpot(tx, ty); if (spot) { teleport(spot[0], spot[1]); S.showMap = false; }
   });
+  { const mc = $('mapclose'); if (mc) mc.addEventListener('click', () => { S.showMap = false; }); const bw = $('bigwrap'); if (bw) bw.addEventListener('click', e => { if (e.target === bw) S.showMap = false; }); }
   // v7.6.4 C: mouse hover tooltip — short sourced description per building / landmark (data/tooltips.js; 未核实 when unsourced)
   const hoverAt = (tx, ty) => { // tx,ty in tiles; the drawn sprite covers footprint + the wall rising north of it
     let best = null, bd = 1.5;
@@ -888,7 +901,19 @@
   window.__nearSpot = () => nearSpot();
   const KIND_ZH = { teach: '教学 / 科研楼', res: '公寓', dorm: '学生宿舍', canteen: '食堂', gym: '体育场馆', library: '图书馆', main: '主楼', low: '附属建筑', shed: '附属建筑', pavilion: '亭 / 廊', admin: '办公楼', school: '中小学', hall: '会议中心', stand: '看台 / 器材室' };   // v7.6.2: school / hall / stand
   function introCard() {
-    const el = $('intro'); if (!el) return; const b = nearBig() || nearSpot(), id = b ? b.id : '';
+    const el = $('intro'); if (!el) return;
+    // v7.10 新生第一屏：站在一道门时先给「你到学校了」这张卡，8 秒后恢复正常介绍
+    if (S.onboard) {
+      if (introCard.onb !== true) {
+        introCard.onb = true;
+        el.querySelector('.it').textContent = '一道门 · 中北大学正门';
+        el.querySelector('.is').textContent = '学院路 · 你刚到学校';
+        el.querySelector('.ib').textContent = '门里是德怀广场和彭德怀元帅铜像；往北 1 公里是行知广场——报到、领校园一卡通都在那儿。先认认路，点右上小地图或 ☰ 可以直接去。';
+        el.classList.add('on');
+      }
+      return;
+    } else if (introCard.onb === true) { introCard.onb = false; introCard.id = ''; el.classList.remove('on'); }
+    const b = nearBig() || nearSpot(), id = b ? b.id : '';
     if (id !== introCard.id) { introCard.id = id;
       if (b) { el.querySelector('.it').textContent = b.linkname || b.name;
         el.querySelector('.is').textContent = [b.kz || KIND_ZH[b.k] || '建筑', b.f ? b.f + ' 层' : '', b.enter ? '可进入（按 E）' : '', b.generic || b.approx ? '名称 / 位置为近似' : ''].filter(Boolean).join(' · ');

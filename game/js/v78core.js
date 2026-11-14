@@ -10,7 +10,8 @@
   const SAVE_KEY = 'nuc-campus-save-v1', ACH_KEY = 'nuc-campus-ach-v1', MAPEDIT_KEY = 'nuc-campus-mapedit-v1', PREF_KEY = 'nuc-campus-pref-v1';
   // 地标：坐标是门外可站立的近似点（格），传送前会再找空位
   const LANDMARKS = [
-    { id: 'spawn', name: '主楼前（出生点）', x: 484.05, y: 267.75, icon: '🏛' },
+    { id: 'gate1', name: '一道门（正门）', x: 241.6, y: 492.0, icon: '🚪' },
+    { id: 'spawn', name: '主楼前 · 行知广场', x: 484.05, y: 267.75, icon: '🏛' },
     { id: 'lib', name: '图书馆', x: 425.67, y: 227.0, icon: '📚' },
     { id: 'hongxue', name: '鸿学楼 12 号楼', x: 388.17, y: 234.0, icon: '🏫' },
     { id: 'canteen', name: '文瀛食堂', x: 330.95, y: 297.0, icon: '🍜' },
@@ -18,7 +19,6 @@
     { id: 'badminton', name: '羽毛球馆', x: 435.28, y: 264.0, icon: '🏸' },
     { id: 'swim', name: '游泳馆 · 健身馆', x: 433.62, y: 159.0, icon: '🏊' },
     { id: 'statue', name: '彭德怀雕像', x: 242.51, y: 470.5, icon: '🐴' },
-    { id: 'gate1', name: '一道门', x: 241.6, y: 492.0, icon: '🚪' },
     { id: 'gate_n', name: '北门', x: 707.5, y: 54.0, icon: '🚪' },
     { id: 'erlong', name: '二龙山公园大门', x: 199.0, y: 252.0, icon: '⛰' },
     { id: 'summit', name: '二龙山顶', x: 126.0, y: 176.0, icon: '🏔' },

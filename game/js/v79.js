@@ -124,23 +124,48 @@
     }
   }
 
+  // v7.10 新生导航：按「门 → 学习 → 吃饭 → 运动 → 景点」分组，每项带一句「这里是干嘛的」
+  const NAV_GROUPS = [
+    { title: '校门与报到', ids: ['gate1', 'gate_n', 'spawn'], hint: { gate1: '正门，新生报到从这进', spawn: '报到、领校园一卡通', gate_n: '靠二龙山和北区' } },
+    { title: '学习', ids: ['lib', 'hongxue'], hint: { lib: '借书、自习、查资料', hongxue: '上课（302 教室在小测）' } },
+    { title: '吃饭', ids: ['canteen', 'shiwei'], hint: { canteen: '西区主食堂', shiwei: '老刀削面在这儿' } },
+    { title: '运动', ids: ['badminton', 'swim'], hint: { badminton: '室内羽毛球', swim: '游泳、健身' } },
+    { title: '校园景点', ids: ['statue', 'erlong', 'summit'], hint: { statue: '打卡点', erlong: '二龙山登山入口', summit: '看校园全景' } },
+  ];
+  function goLandmark(l) {
+    closeSheets();
+    if (A.S.mode !== 'out') { A.toast('请先到室外再传送', 1500); return; }
+    if (window.V77 && V77.riding && V77.riding()) { A.toast('请先还车再传送', 1800); return; }
+    if (window.V78 && V78.frozen && V78.frozen()) __v78.togglePhoto(false);
+    const spot = A.freeSpot(l.x, l.y) || [l.x, l.y];
+    A.teleport(spot[0], spot[1]); A.toast(`📍 已传送到「${l.name}」`, 1800);
+  }
+
   function openLandmarks() {
     const p = $('tp'); if (!p || !window.V78Core) return;
-    p.innerHTML = '<div class="sheet-handle"></div><div class="mt">地标传送</div><div class="sheet-body"></div>';
+    p.innerHTML = '<div class="sheet-handle"></div><div class="mt">去哪里 <span class="small">（点一下直接过去）</span></div><div class="sheet-body"></div>';
     const body = p.querySelector('.sheet-body');
-    V78Core.LANDMARKS.forEach((l, i) => {
-      const b = document.createElement('button'); b.type = 'button';
-      b.innerHTML = `<span>${l.icon}</span>${l.name}`;
-      tap(b, () => {
-        closeSheets();
-        if (A.S.mode !== 'out') { A.toast('请先到室外再传送', 1500); return; }
-        if (window.V77 && V77.riding && V77.riding()) { A.toast('请先还车再传送', 1800); return; }
-        if (window.V78 && V78.frozen && V78.frozen()) __v78.togglePhoto(false);
-        const spot = A.freeSpot(l.x, l.y) || [l.x, l.y];
-        A.teleport(spot[0], spot[1]); A.toast(`📍 已传送到「${l.name}」`, 1800);
-      });
+    const byId = new Map(V78Core.LANDMARKS.map(l => [l.id, l]));
+    const seen = new Set();
+    const addBtn = (l, hint) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'navbtn';
+      b.innerHTML = `<span class="navi">${l.icon}</span><span class="navt"><b>${l.name}</b>${hint ? `<i>${hint}</i>` : ''}</span>`;
+      tap(b, () => goLandmark(l));
       body.appendChild(b);
-    });
+    };
+    for (const g of NAV_GROUPS) {
+      const items = g.ids.map(id => byId.get(id)).filter(Boolean);
+      if (!items.length) continue;
+      const h = document.createElement('div'); h.className = 'navgroup'; h.textContent = g.title;
+      body.appendChild(h);
+      for (const l of items) { addBtn(l, g.hint && g.hint[l.id]); seen.add(l.id); }
+    }
+    const rest = V78Core.LANDMARKS.filter(l => !seen.has(l.id));
+    if (rest.length) {
+      const h = document.createElement('div'); h.className = 'navgroup'; h.textContent = '其他';
+      body.appendChild(h);
+      for (const l of rest) addBtn(l);
+    }
     const cl = document.createElement('button'); cl.className = 'sheet-close'; cl.type = 'button'; cl.textContent = '关闭';
     tap(cl, () => closeSheets()); p.appendChild(cl);
     sheetify('tp');
@@ -309,6 +334,15 @@
       hookMenubtn();
       bindPause();
       bindGestures();
+      // v7.10 大地图上的「用列表直接去」：手机上点不准地图时，一条路走到地标列表
+      { const bmn = $('bigmapnav'); if (bmn) tap(bmn, () => { A.S.showMap = false; openLandmarks(); }); }
+      // 触屏上地图只是「看个大概」，把标题里的提示换成实话
+      if (document.body.classList.contains('touch')) {
+        const t = document.querySelector('#bigwrap .title .small');
+        if (t) t.textContent = '（手机上请用下面的列表 · 右下角可关闭）';
+      }
+      // v7.10 右上角小地图也能点开导航（108px，比地图里任何一栋楼都大）
+      { const mm = $('mmwrap'); if (mm) tap(mm, () => { if (A.S.mode !== 'out') return; A.S.showMap = false; openLandmarks(); }); }
       onPhotoTouch();
       patchTipPosition();
       // hide legacy floating controls on phone — CSS also hides
