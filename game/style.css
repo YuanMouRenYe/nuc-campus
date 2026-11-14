@@ -368,3 +368,6 @@ body.touch #fab.on b, body.touch #fab.on span { color: #2a1a10; }
 
 /* v7.10 新生欢迎卡出现时，先别叠「按 E 查看」的提示条 */
 #intro.on ~ #hint { display: none !important; }
+
+/* v7.10.1 手机欢迎卡最多显示 4 行，别把最后一句裁掉 */
+body.touch #intro .ib { max-height: 6.4em; }

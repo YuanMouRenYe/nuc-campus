@@ -908,7 +908,7 @@
         introCard.onb = true;
         el.querySelector('.it').textContent = '一道门 · 中北大学正门';
         el.querySelector('.is').textContent = '学院路 · 你刚到学校';
-        el.querySelector('.ib').textContent = '门里是德怀广场和彭德怀元帅铜像；往北 1 公里是行知广场——报到、领校园一卡通都在那儿。先认认路，点右上小地图或 ☰ 可以直接去。';
+        el.querySelector('.ib').textContent = '门里是德怀广场和彭德怀元帅铜像。往北 1 公里是行知广场，报到和领校园卡都在那儿；点右上小地图可以直接去。';
         el.classList.add('on');
       }
       return;
