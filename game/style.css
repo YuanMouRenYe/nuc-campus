@@ -371,3 +371,25 @@ body.touch #fab.on b, body.touch #fab.on span { color: #2a1a10; }
 
 /* v7.10.1 手机欢迎卡最多显示 4 行，别把最后一句裁掉 */
 body.touch #intro .ib { max-height: 6.4em; }
+
+/* ===== v7.10.2 皮肤补漏（UI 评审指出的 4 处漏网 + 触屏态 + 夜景） ===== */
+body.touch #bigmapnav { background: var(--ui-bg-2); color: var(--ui-text); border: 2px solid var(--ui-line-dim); }
+#tp .navgroup { color: var(--ui-dim); }
+#quiz .opt { color: var(--ui-text); background: var(--ui-bg-2); border: 2px solid var(--ui-line-dim); }
+#quiz .opt:hover { background: #4a3220; }
+#quiz .opt.right { background: #2f5a2a; border-color: #8fd18a; color: #eaffdc; }
+#quiz .opt.wrong { background: #5a2a2a; border-color: #e08a7a; color: #ffe6e0; }
+.ph-btn, .ph-snap { background: var(--ui-bg-2); color: var(--ui-text); border: 2px solid var(--ui-line-dim); }
+.ph-snap { background: var(--ui-accent); color: #2a1a10; border-color: #2a1a10; }
+#achpanel .close, #mapclose, .ph-btn { min-height: 44px; }
+body.touch #achpanel .close, body.touch #mapclose, body.touch .ph-btn { min-height: 48px; }
+/* 触屏点完不该「粘」在 hover 态：没有 hover 能力的设备还原 */
+@media (hover: none) {
+  #menu button:hover, #tp button:hover, #bigmapnav:hover, #achpanel .close:hover {
+    border-color: var(--ui-line-dim); background: var(--ui-bg-2);
+  }
+  #quiz .opt:hover { background: var(--ui-bg-2); }
+}
+/* 夜景：把金线和内高光提亮，避免面板和暗下来的场景糊成一块 */
+body.night { --ui-line: #ffd98a; --ui-line-dim: #c9a268; --ui-shadow: 0 5px 0 rgba(0,0,0,.45); }
+body.night .panel { box-shadow: inset 0 0 0 1px rgba(255,255,255,.16), var(--ui-shadow); }

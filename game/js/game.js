@@ -597,6 +597,7 @@
         for (const id of got) { const q = Core.QUEST_POOL.find(q => q.id === id), n = list.filter(t => S.quests.done[t.id] != null).length; toast(`✔ 任务完成：${q.text} —— ${q.done}${n === list.length ? '　🎉 今日任务全部完成！' : ''}`, 5000); Sound.chime(); renderQuests(); save(); } } }
     if (S.frame % 30 === 0) applyWeather(false); // new day -> new weather roll
     Sound.ambience(Core.nightness(S.minutes), S.mode === 'in', S.weather, S.season);
+    if (document.body) document.body.classList.toggle('night', Core.nightness(S.minutes) > 0.55);
     // camera（v7.8 拍照模式：相机自由平移，不跟玩家）
     if (window.V78 && V78.frozen()) { const c = V78.photoCam(dt, S.keys, cam); if (c) { cam.x = c.x; cam.y = c.y; } clampCam(); }
     else { const U = S.mode === 'out' ? T : IT, tx = player.x * U;
