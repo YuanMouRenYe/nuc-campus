@@ -13,7 +13,7 @@
 ```bash
 cd game && python3 -m http.server 8090
 ```
-浏览器打开 http://localhost:8090/editor.html(游戏里按 Tab 打开菜单,也能进入「地图编辑器」)。
+编辑器**不随公开站点发布**,菜单里也没有入口。改图时在**仓库根目录**执行 `npm run admin`,终端会打印管理员地址(默认 `http://127.0.0.1:8790/editor.html`);直接 `python -m http.server` 打开 `editor.html` 也可以,但发布功能要走 admin 服务。
 URL 参数:`?pristine` 忽略本地修改、打开原图;`?at=x,y,z` 打开时定位到格坐标 (x, y)、缩放 z。
 
 ## 界面

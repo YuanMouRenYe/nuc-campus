@@ -54,7 +54,7 @@
     const menu = el('div', 'menu', 'panel', '');
     const items = [['🗺', '校园地图', 'M', () => { A.S.showMap = !A.S.showMap; }], ['📋', '今日任务', 'Q', () => A.toggleQuests()], ['🏅', '成就', 'K', () => togglePanel()], ['🛵', '骑车 / 还车', 'B', () => toggleRide()],
       ['🍂', '换季节', 'J', () => A.cycleSeason()], ['☁', '换天气', 'T', () => A.cycleWeather()], ['🔊', '声音', 'V', () => A.toggleMute()], ['⏩', '快进 1 小时', 'N', () => { A.S.minutes += 60; }],
-      ['✏', '地图编辑器', '', () => { location.href = 'editor.html'; }], ['❓', '操作说明', '', () => { A.S.dialog = helpText(); }]];
+      ['❓', '操作说明', '', () => { A.S.dialog = helpText(); }]];
     menu.innerHTML = '<div class="mt">菜单 <span class="small">（Tab / Esc 关闭）</span></div>' + items.map((it, i) => `<button data-i="${i}"><span>${it[0]}</span>${it[1]}${it[2] ? `<i>${it[2]}</i>` : ''}</button>`).join('');
     for (const b of menu.querySelectorAll('button')) tapBtn(b, () => { menu.classList.remove('on'); items[+b.dataset.i][3](); });
     tapBtn(el('button', 'menubtn', 'panel', '☰'), () => menu.classList.toggle('on'));

@@ -33,6 +33,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # 地图编辑器只给管理员本地用（npm run admin），不随公开站点发布
+      - name: Strip admin-only editor
+        run: rm -f game/editor.html game/editor.css game/js/editor.js
       - uses: actions/upload-pages-artifact@v3
         with:
           path: game

@@ -94,7 +94,6 @@
       ['⏩', '快进 1 小时', () => { A.S.minutes += 60; }],
       ['💾', '导出存档备份', () => { if (window.__v78) __v78.exportBackup(); }],
       ['📂', '导入存档备份', () => { const fi = $('bkfile'); if (fi) fi.click(); }],
-      ['✏', '地图编辑器', () => { location.href = 'editor.html'; }],
       ['ℹ', '关于', () => { if (window.V78) { closeSheets(); setTimeout(() => { const b = [...document.querySelectorAll('#menu button')]; /* use about via API */ openAbout(); }, 0); } }],
       ['🖥', '操作模式', () => cycleInputMode()],
       ['❓', '操作说明', () => { A.S.dialog = helpMobile(); }],

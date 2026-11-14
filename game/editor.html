@@ -2,6 +2,20 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8">
+<script>
+// v7.9.5 管理员工位：地图编辑器只在管理员本地可用（npm run admin），公开站点不部署。
+// 有人把 editor.html 单独传上去也打不开：非本机地址直接拦掉。
+(function () {
+  var host = location.hostname, local = /^(localhost|127\.0\.0\.1|\[::1\]|::1)$/.test(host) || host === '';
+  if (!local && !/[?&]admin=1\b/.test(location.search)) {
+    document.write('<!doctype html><html lang="zh-CN"><meta charset="utf-8"><title>无权访问</title>' +
+      '<body style="font:16px/1.8 system-ui,sans-serif;padding:48px;max-width:640px"><h2>地图编辑器仅限管理员本机使用</h2>' +
+      '<p>请在本机仓库根目录执行 <code>npm run admin</code>，再用终端给出的地址打开。</p>' +
+      '<p><a href="./index.html">返回游戏</a></p></body></html>');
+    throw new Error('admin-only');
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>地图编辑器 · 中北大学像素校园</title>
 <link rel="icon" href="data:,">
